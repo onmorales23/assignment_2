@@ -32,7 +32,7 @@ test <- test %>% mutate(across(.fns = as.numeric))
 
 ```{r pre q PSM model, echo = T, include = T, message=F, warning = F, error = F}
 
-covariateNamesBART <- c(
+covariateNames <- c(
     "X1RTHETK1", 
     "X1MTHETK1",
     "X1TCHAPP", 
