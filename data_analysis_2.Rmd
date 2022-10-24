@@ -123,7 +123,7 @@ cate_m <- apply(cate, 2, mean)
 
 learners <- c("random_forest", "lasso")
 
-matrix_covs <- as.matrix(data %>% select(covariateNames) %>%
+matrix_covs <- as.matrix(data %>% select(all_of(covariateNames)) %>%
                            mutate(across(.fns = as.numeric))) 
 
 X1 <- setup_X1(funs_Z = c("B", "S"))
@@ -202,12 +202,15 @@ library(patchwork)
 layout <- c("#AA#
             BBCC
             DDEE")
-a + b + c + d + e +
+genMLplot<- a + b + c + d + e +
   plot_layout(design = layout)
 
 ```
-
-
+\newpage
+```{r}
+genMLplot
+```
+\newpage
 ## causal forests
 ```{r q_1 CF, echo = T, include = T, message = F, warning = F, error = F}
 #the grf package only takes numeric covariates
