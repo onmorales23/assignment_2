@@ -92,6 +92,10 @@ covariateNamesBART <- c(
     "S2USDABR",
     "S2PUBSOC",
     "X1LOCALE")
+
+psFormula <- paste(covariateNames, collapse="+")
+psFormula <- formula(paste("treated~", psFormula, sep=""))
+print(psFormula) 
     
 ```
 
