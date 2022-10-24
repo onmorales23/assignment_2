@@ -156,6 +156,40 @@ genML <- GenericML(
 
 ## causal forests
 ```{r q_1 CF, echo = T, include = T, message = F, warning = F, error = F}
+#the grf package only takes numeric covariates
+data2 <- data
+#So convert those factor variables to be the numeric class
+for (i in 1:length(covariateNames)) {
+  if(class(data2[,covariateNames[i]])=="factor"){
+    data2[, covariateNames[i]] <- as.numeric(as.character(data2[,covariateNames[i]]))
+  }
+}
+
+#Step 1: Split data into training data set and testing data set
+#In this case, we split it to be 50/50
+set.seed(123)
+train_index <- sample(1:nrow(data2), nrow(data2)/2)
+train_index <- train_index[order(train_index)]
+
+train_data <- data2[train_index,]
+test_data <- data2[-train_index,]
+
+#Step 2: model fit, using causal forest
+#Tuning mtry and min.node.size parameters by setting tune.parameters
+train.forest = causal_forest(X=train_data[,covariateNames],
+                              Y = train_data$X2MTHETK1, num.trees = 5000,
+                              W = as.numeric(as.character(train_data$treated)),
+                              W.hat = train_data$ps,
+                              tune.parameters = c("mtry", "min.node.size"),
+                              seed = 0)
+
+train.forest[["tuning.output"]]
+#The results showed that mtry = 16 and min.node.size = 1 perform better than the default setting
+
+#Step 3: Obtain estimates of the conditional average treatment effect (CATE)
+#with standard errors
+tau.hat = predict(train.forest,X= test_data[,covariateNames], estimate.variance = T)
+CATE_causalForest = tau.hat$predictions
 
 
 ```
@@ -172,15 +206,71 @@ ggplot(data, aes(x=logit_scores, color = selfEmploy)) +
 ggplot(data, aes(x=forest_scores, color = selfEmploy)) + 
   geom_boxplot() + ggtitle("Random Forest")
 
-# Causal Forests
 ggplot(data, aes(x=GBM_scores, color = selfEmploy)) + 
   geom_boxplot() + ggtitle("GBM")
+
+# Causal Forests
+#1. correlation matrix
+#causal forest only output the best tunning parameters' model fit outcomes
+#To answer Q2, I run one more model fit with mtry = 4 and min.node.size = 50
+train.forest2 = causal_forest(X=train_data[,covariateNames],
+                              Y = train_data$X2MTHETK1, num.trees = 5000,
+                              W = as.numeric(as.character(train_data$treated)),
+                              W.hat = train_data$ps,
+                              mtry = 4, min.node.size = 50,
+                              seed = 0)
+tau.hat2 = predict(train.forest2,X= test_data[,covariateNames], estimate.variance = T)
+CATE2_causalForest = tau.hat2$predictions
+
+cor(CATE_causalForest, CATE2_causalForest)
+
+#2.box plot
+boxplot(CATE_causalForest, CATE2_causalForest)
+
+#3.QQ plot
+qqplot(CATE_causalForest, CATE2_causalForest)
 
 
 ```
 
 # Determine Best Linear Projection of CATE/Variable Importance
 ```{r q_3, echo = T, include = T, message = F, warning = F, error = F}
+#BART
+
+
+#GenericML
+
+
+#Causal Forests
+#Step 1: Subset important variables
+importance_cf = variable_importance(train.forest)
+rownames(importance_cf) = names(train_data[,covariateNames])
+
+#select variables above the median of importance of the aggregated importances
+#across imputed datasets
+important.var_cf = rownames(importance_cf)[importance_cf>median(importance_cf)]
+
+#Step 2
+#run test forest
+test.forest = causal_forest(X = test_data[,important.var_cf],
+                            Y = test_data$X2MTHETK1,
+                            W = as.numeric(as.character(test_data$treated)),
+                            W.hat = test_data$ps,
+                            mtry = 16, num.trees=5000,
+                            min.node.size = 1, seed = 0)
+
+#Step 3: Predict the conditional average treatment effect (CATE)
+tau.hat = predict(test.forest,X= test_data[,important.var_cf], estimate.variance = T)
+CATE_test = tau.hat$predictions
+summary(CATE_test)
+
+#When using the test data set and fitting the important variables,
+ #the conditional ATE was small, which ranges from -0.401 to 0.254 with a mean of 0.018.
+
+test_calibration(test.forest)
+#The outcomes showed that the coefficient of the mean forest prediction was 1 
+ #which indicated the mean forest prediction was correct. 
+#Also, the results indicated no heterogeneity been detected.
 
 
 ```
@@ -188,6 +278,35 @@ ggplot(data, aes(x=GBM_scores, color = selfEmploy)) +
 
 # Two most important CATE predictors (For each method), plot CATE/predictor relationship
 ```{r q_4, echo = T, include = T, message = F, warning = F, error = F}
+#BART
+
+
+#GenericML
+
+
+#Causal Forests
+#The most two predictors are
+Top2predictors <- importance_cf[order(importance_cf, decreasing = T),][1:2]
+
+#Predictor 1
+groupX1MTHETK1 <- quantile(test_data[, names(Top2predictors)[1]])
+test_data$groupX1M <- ifelse(test_data$X1MTHETK1 >= groupX1MTHETK1[4], 4, 
+                             ifelse(test_data$X1MTHETK1>=groupX1MTHETK1[3] & test_data$X1MTHETK1<groupX1MTHETK1[4], 3,
+                                    ifelse(test_data$X1MTHETK1>=groupX1MTHETK1[2] & test_data$X1MTHETK1<groupX1MTHETK1[3], 2,
+                                           1)))
+test_data$groupX1M <- factor(test_data$groupX1M)
+boxplot(CATE_causalForest ~ test_data$groupX1M, xlab = "X1MTHETK1 Group", ylab = "CATE")
+
+#Predictor 2
+groupX1R <- quantile(test_data[, names(Top2predictors)[2]])
+test_data$groupX1R <- ifelse(test_data$X1RTHETK1 >= groupX1R[4], 4, 
+                             ifelse(test_data$X1RTHETK1>=groupX1R[3] & test_data$X1RTHETK1<groupX1R[4], 3,
+                                    ifelse(test_data$X1RTHETK1>=groupX1R[2] & test_data$X1RTHETK1<groupX1R[3], 2,
+                                           1)))
+test_data$groupX1R <- factor(test_data$groupX1R)
+boxplot(CATE_causalForest ~ test_data$groupX1R, xlab = "X1RTHETK1 Group", ylab = "CATE")
+
+
 
 
 ```
