@@ -8,7 +8,7 @@ date: \today
 ```{r setup, echo=T, include=T, message=F, warning=F, error=F}
 
 ## libraries
-libs <- c("tidyverse", "haven", "bibtex", "psych", "knitr", "pastecs", "kableExtra","survey", "cobalt", "randomForest", "ipred","rpart", "baguette", "parsnip", "SimDesign", "bartCause", "lme4", "grf", "genericML")
+libs <- c("tidyverse", "haven", "bibtex", "psych", "knitr", "pastecs", "kableExtra","survey", "cobalt", "randomForest", "ipred","rpart", "baguette", "parsnip", "SimDesign", "bartCause", "lme4", "grf", "GenericML")
 
 sapply(libs, require, character.only = TRUE)
 
@@ -33,7 +33,7 @@ covariateNames <- c(
     "X1RTHETK1", 
     "X1MTHETK1",
     "X1TCHAPP", 
-    "X1TCHCON ",
+    "X1TCHCON",
     "X1TCHPER", 
     "X1TCHEXT",
     "X1TCHINT",
@@ -65,7 +65,7 @@ covariateNames2 <- c(
     "X1RTHETK1", 
     "X1MTHETK1",
     "X1TCHAPP", 
-    "X1TCHCON ",
+    "X1TCHCON",
     "X1TCHPER", 
     "X1TCHEXT",
     "X1TCHINT",
@@ -127,6 +127,29 @@ bart = bartc(response = T2TTABS,
 ## genericML 
 ```{r q_1 genML, echo = T, include = T, message = F, warning = F, error = F}
 
+learners <- c("random_forest", "lasso")
+
+matrix_covs <- as.matrix(data %>% select(covariateNames))
+
+X1 <- setup_X1(funs_Z = c("B", "S"))
+               #fixed_effects = vil_pair)
+
+vcov <- setup_vcov(estimator = "vcovHC")
+                   #arguments = list(cluster = demi_paire))
+
+genML <- GenericML(
+  Z = matrix_covs, 
+  D = as.numeric(data$treated), 
+  Y = data$T2TTABS,                      # observed data z covs, d treat, y outcome
+  learners_GenericML = learners,            # learners
+  learner_propensity_score = ps_matrix,    # logit estimated ps above
+  num_splits = 100L,                        # number splits
+  quantile_cutoffs = c(0.2, 0.4, 0.6, 0.8), # grouping
+  significance_level = 0.05,                # significance level
+  X1_BLP = X1, X1_GATES = X1,               # regression setup
+  vcov_BLP = vcov, vcov_GATES = vcov,       # covariance setup
+  parallel = F, #num_cores = 6L, # parallelization
+  seed = 20220621)                         # RNG seed
 
 ```
 
