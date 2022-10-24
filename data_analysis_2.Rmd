@@ -61,24 +61,66 @@ covariateNames <- c(
     "S1_ID",
     "W1_2P0PSU")
 
-
+covariateNames2 <- c(
+    "X1RTHETK1", 
+    "X1MTHETK1",
+    "X1TCHAPP", 
+    "X1TCHCON ",
+    "X1TCHPER", 
+    "X1TCHEXT",
+    "X1TCHINT",
+    "X1ATTNFS",
+    "X1INBCNT",
+    "X12MOMAR",
+    "X1NUMSIB", 
+    "P1OLDMOM",
+    "P1CHLDBK",
+    "P2DISTHM",
+    "P1NUMPLA",
+    "T2PARIN",
+    "X12PAR1ED_I",
+    "X12PAR2ED_I",
+    "X2INCCAT_I",
+    "X1PAR1EMP",
+    "S2LUNCH",
+    "X2KRCETH",
+    "S2NGHBOR",
+    "S2OUTSID",
+    "S2USDABR",
+    "S2PUBSOC",
+    "X1LOCALE")
     
 #obtain the propensity score formula   
 psFormula <- paste(covariateNames, collapse="+")
 psFormula <- formula(paste("treated~", psFormula, sep=""))
 print(psFormula)   
 
-ps_model = glm(psFormula, data = data, family= binomial)
+ps_model = glm(psFormula, data = data, family = binomial)
 
-data$ps <- fitted (ps_model)
+data$ps <- fitted(ps_model)
+
+n <- 999
+ps_matrix <- as.data.frame(data$ps)
+ps_matrix <- cbind(ps_matrix, rep(ps_matrix[1], n))
+ps_matrix <- as.matrix(ps_matrix)
 
 ```
 
 # Estimating CATEs Using Machine Learning Methods
 ## BART
-```{r q_1,BART, echo = T, include = T, message=F, warning = F, error = F}
+```{r q_1,BART, echo = T, include = T, message= F, warning = F, error = F}
 
 # estimating conditional average treatment effects (CATEs) using BART
+
+bart = bartc(response = T2TTABS, 
+            treatment = treated, 
+            ndpost = 1000,
+            confounders = as.matrix(covariateNames2), 
+            method.rsp = "p.weight", 
+            method.trt = ps_matrix, 
+            data = data, 
+            estimand = "ate")
+
 
 ```
 
