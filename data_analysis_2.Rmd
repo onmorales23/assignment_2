@@ -9,29 +9,9 @@ date: \today
 ```{r setup, echo=T, include=T, message=F, warning=F, error=F}
 
 ## libraries
-libs <- c("tidyverse", "haven", "bibtex", "psych", "knitr", "pastecs", "kableExtra","survey", "cobalt", "randomForest", "ipred","rpart", "baguette", "parsnip", "SimDesign", "bartCause", "lme4", "grf", "GenericML")
+libs <- c("tidyverse", "haven", "bibtex", "psych", "knitr", "pastecs", "kableExtra","survey", "cobalt", "randomForest", "ipred","rpart", "baguette", "parsnip", "SimDesign", "bartCause", "lme4", "grf", "GenericML", "car")
 
 sapply(libs, require, character.only = TRUE)
-
-## directory path (assignment_2 as current working directory)
-
-data_dir <- file.path(".", "data")
-
-## loading data
-load(file.path(data_dir, "chapter_10_data_cleaned_and_imputed.Rdata"))
-
-train <- data %>% 
-  sample_frac(size = 0.5)
-
-test <- anti_join(data, train)
-
-train <- train %>% mutate(across(.fns = as.numeric))    
-test <- test %>% mutate(across(.fns = as.numeric))    
-```
-
-# Defining/Estimating Propensity Score Model
-
-```{r pre q PSM model, echo = T, include = T, message=F, warning = F, error = F}
 
 covariateNames <- c(
     "X1RTHETK1", 
@@ -94,6 +74,20 @@ covariateNamesBART <- c(
     "S2PUBSOC",
     "X1LOCALE")
 
+## directory path (assignment_2 as current working directory)
+
+data_dir <- file.path(".", "data")
+
+## loading data
+load(file.path(data_dir, "chapter_10_data_cleaned_and_imputed.Rdata"))
+
+```
+
+# Defining/Estimating Propensity Score Model
+
+```{r pre q PSM model, echo = T, include = T, message=F, warning = F, error = F}
+
+
 psFormula <- paste(covariateNames, collapse="+")
 psFormula <- formula(paste("treated~", psFormula, sep=""))
 print(psFormula) 
@@ -104,39 +98,58 @@ print(psFormula)
 ## BART
 ```{r q_1,BART, echo = T, include = T, message= F, warning = F, error = F}
 
+# credit to Matt, esp for the covs matrices!
+train <- data %>% 
+  sample_frac(size = 0.5)
+test <- anti_join(data, train)
+
+matrix_covsBART <- as.matrix(train %>% select(covariateNamesBART) %>%
+                           mutate(across(.fns = as.numeric))) 
+
+matrix_covsBART_2 <- as.matrix(test %>% select(covariateNamesBART) %>%
+                           mutate(across(.fns = as.numeric))) 
+
 # estimating conditional average treatment effects (CATEs) using BART
 
-bart <- bartc(response = train$T2TTABS,
-             treatment = train$treated,
-             confounders = data.frame(train[,covariateNamesBART]),
+bart <- bartc(response = train$X2MTHETK1,
+             treatment = as.numeric(as.character(train$treated)),
+             confounders = matrix_covsBART,
              method.rsp = "bart", 
-             method.trt = "bart",
+             method.trt = "glm",
              keepTrees = TRUE,
              estimand = "ate")
 
 cate <- predict(bart,
-               newdata = data.frame(test[,covariateNamesBART]),
+               newdata = matrix_covsBART_2,
                type = "icate")
 
 cate_m <- apply(cate, 2, mean) 
 
 ```
 
+```{r q_2,BART, echo = T, include = T, message= F, warning = F, error = F}
+
+# correlation matrix
+
+
+# qqplot 
+
+
+
+
+
+
+```
 ## GenericML 
 ```{r q_1 genML, echo = T, include = T, message = F, warning = F, error = F}
 ##' @Matt
-
 learners <- c("random_forest", "lasso")
-
 matrix_covs <- as.matrix(data %>% select(all_of(covariateNames)) %>%
                            mutate(across(.fns = as.numeric))) 
-
 X1 <- setup_X1(funs_Z = c("B", "S"))
                #fixed_effects = vil_pair)
-
 vcov <- setup_vcov(estimator = "vcovHC")
                    #arguments = list(cluster = demi_paire))
-
 library(parsnip)
 ps_nnet <- mlp(mode = "classification",
                engine = "nnet",
@@ -147,7 +160,6 @@ data$ps_nnet <- predict(ps_nnet,
                       new_data = data,
                       type = "prob")[,2]
 data$ps_nnet <- data$ps_nnet$.pred_1 ## remove the $column.name
-
 genML <- GenericML(
   Z = matrix_covs, #covariates
   D = as.numeric(as.character(data$treated)), #treatment
@@ -161,39 +173,30 @@ genML <- GenericML(
   vcov_BLP = vcov, vcov_GATES = vcov,       # covariance setup
   parallel = F, #num_cores = 6L, # parallelization
   seed = 20220621)                         # RNG seed
-
 best <- get_best(genML)
 ## random_forest is best, becomes the default for all future GenML functions
-
 base <- get_BLP(genML)
 ## Β2 is significant indicating treatment heterogeneity
-
 a <- get_GATES(genML) %>%
   plot()
-
-
 # Plot parental education
 b <- get_CLAN(genML,
          variable = "X12PAR1ED_I") %>%
   plot() +
   labs(title = "Heterogeneity by First Parents Education",
        y = str_wrap("Average Value of Parental Education", 25))
-
 # Plot family marriage status
 c <- get_CLAN(genML,
          variable = "X12MOMAR") %>%
   plot() +
   labs(title = "Heterogeneity by Parental Marriage Status",
        y = str_wrap("Average Value of Parental Marriage Status", 25))
-
-
 # Plot lunch variable
 d <- get_CLAN(genML,
          variable = "S2LUNCH") %>%
   plot() +
   labs(title = "Heterogeneity by Free School Lunch",
        y = str_wrap("Average Value of Students Receiving Free Lunch", 25))
-
 # Plot percent coming from neighborhood
 e <- get_CLAN(genML,
          variable = "S2NGHBOR") %>%
@@ -201,21 +204,19 @@ e <- get_CLAN(genML,
   labs(title = "Heterogeneity by Percent of School coming from 
        Surrounding Neighborhood",
        y = str_wrap("Average Value of Percent Coming from Neighborhood", 25))
-
-
 library(patchwork)
 layout <- c("#AA#
             BBCC
             DDEE")
 genMLplot<- a + b + c + d + e +
   plot_layout(design = layout)
-
 ```
 \newpage
 ```{r}
 genMLplot
 ```
 \newpage
+
 ## causal forests
 ```{r q_1 CF, echo = T, include = T, message = F, warning = F, error = F}
 #the grf package only takes numeric covariates
@@ -260,16 +261,6 @@ CATE_causalForest = tau.hat$predictions
 
 ```{r q_2, echo = T, include = T, message = F, warning = F, error = F}
 
-# # BART
-# ggplot(data, aes(x=logit_scores, color = selfEmploy)) + 
-#   geom_boxplot() + ggtitle("Logit Regression")
-# 
-# # GenericML
-# ggplot(data, aes(x=forest_scores, color = selfEmploy)) + 
-#   geom_boxplot() + ggtitle("Random Forest")
-# 
-# ggplot(data, aes(x=GBM_scores, color = selfEmploy)) + 
-#   geom_boxplot() + ggtitle("GBM")
 
 # Causal Forests
 #1. correlation matrix
