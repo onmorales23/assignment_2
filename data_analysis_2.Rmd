@@ -3,6 +3,7 @@ title: "Data Analysis 2"
 output: pdf_document
 author: Ziying Li, Matt Capaldi, Yujuan Gao, Olivia Morales
 date: \today
+\usepackage{fontspec}
 ---
 
 ```{r setup, echo=T, include=T, message=F, warning=F, error=F}
@@ -161,11 +162,11 @@ genML <- GenericML(
   parallel = F, #num_cores = 6L, # parallelization
   seed = 20220621)                         # RNG seed
 
-get_best(genML)
+best <- get_best(genML)
 ## random_forest is best, becomes the default for all future GenML functions
 
-get_BLP(genML)
-## β2 is significant indicating treatment heterogeneity
+base <- get_BLP(genML)
+## Β2 is significant indicating treatment heterogeneity
 
 a <- get_GATES(genML) %>%
   plot()
@@ -259,16 +260,16 @@ CATE_causalForest = tau.hat$predictions
 
 ```{r q_2, echo = T, include = T, message = F, warning = F, error = F}
 
-# BART
-ggplot(data, aes(x=logit_scores, color = selfEmploy)) + 
-  geom_boxplot() + ggtitle("Logit Regression")
-
-# GenericML
-ggplot(data, aes(x=forest_scores, color = selfEmploy)) + 
-  geom_boxplot() + ggtitle("Random Forest")
-
-ggplot(data, aes(x=GBM_scores, color = selfEmploy)) + 
-  geom_boxplot() + ggtitle("GBM")
+# # BART
+# ggplot(data, aes(x=logit_scores, color = selfEmploy)) + 
+#   geom_boxplot() + ggtitle("Logit Regression")
+# 
+# # GenericML
+# ggplot(data, aes(x=forest_scores, color = selfEmploy)) + 
+#   geom_boxplot() + ggtitle("Random Forest")
+# 
+# ggplot(data, aes(x=GBM_scores, color = selfEmploy)) + 
+#   geom_boxplot() + ggtitle("GBM")
 
 # Causal Forests
 #1. correlation matrix

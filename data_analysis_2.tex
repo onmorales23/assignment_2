@@ -1,0 +1,632 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{pdflscape}
+\usepackage{tabu}
+\usepackage{threeparttable}
+\usepackage{threeparttablex}
+\usepackage[normalem]{ulem}
+\usepackage{makecell}
+\usepackage{xcolor}
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same} % disable monospaced font for URLs
+\hypersetup{
+  pdftitle={Data Analysis 2},
+  pdfauthor={Ziying Li, Matt Capaldi, Yujuan Gao, Olivia Morales},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{Data Analysis 2}
+\author{Ziying Li, Matt Capaldi, Yujuan Gao, Olivia Morales}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\usepackage{fontspec}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\# libraries}
+\NormalTok{libs }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"tidyverse"}\NormalTok{, }\StringTok{"haven"}\NormalTok{, }\StringTok{"bibtex"}\NormalTok{, }\StringTok{"psych"}\NormalTok{, }\StringTok{"knitr"}\NormalTok{, }\StringTok{"pastecs"}\NormalTok{, }\StringTok{"kableExtra"}\NormalTok{,}\StringTok{"survey"}\NormalTok{, }\StringTok{"cobalt"}\NormalTok{, }\StringTok{"randomForest"}\NormalTok{, }\StringTok{"ipred"}\NormalTok{,}\StringTok{"rpart"}\NormalTok{, }\StringTok{"baguette"}\NormalTok{, }\StringTok{"parsnip"}\NormalTok{, }\StringTok{"SimDesign"}\NormalTok{, }\StringTok{"bartCause"}\NormalTok{, }\StringTok{"lme4"}\NormalTok{, }\StringTok{"grf"}\NormalTok{, }\StringTok{"GenericML"}\NormalTok{)}
+
+\FunctionTok{sapply}\NormalTok{(libs, require, }\AttributeTok{character.only =} \ConstantTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##    tidyverse        haven       bibtex        psych        knitr      pastecs 
+##         TRUE         TRUE         TRUE         TRUE         TRUE         TRUE 
+##   kableExtra       survey       cobalt randomForest        ipred        rpart 
+##         TRUE         TRUE         TRUE         TRUE         TRUE         TRUE 
+##     baguette      parsnip    SimDesign    bartCause         lme4          grf 
+##         TRUE         TRUE         TRUE         TRUE         TRUE         TRUE 
+##    GenericML 
+##         TRUE
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\# directory path (assignment\_2 as current working directory)}
+
+\NormalTok{data\_dir }\OtherTok{\textless{}{-}} \FunctionTok{file.path}\NormalTok{(}\StringTok{"."}\NormalTok{, }\StringTok{"data"}\NormalTok{)}
+
+\DocumentationTok{\#\# loading data}
+\FunctionTok{load}\NormalTok{(}\FunctionTok{file.path}\NormalTok{(data\_dir, }\StringTok{"chapter\_10\_data\_cleaned\_and\_imputed.Rdata"}\NormalTok{))}
+
+\NormalTok{train }\OtherTok{\textless{}{-}}\NormalTok{ data }\SpecialCharTok{\%\textgreater{}\%} 
+  \FunctionTok{sample\_frac}\NormalTok{(}\AttributeTok{size =} \FloatTok{0.5}\NormalTok{)}
+
+\NormalTok{test }\OtherTok{\textless{}{-}} \FunctionTok{anti\_join}\NormalTok{(data, train)}
+
+\NormalTok{train }\OtherTok{\textless{}{-}}\NormalTok{ train }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{mutate}\NormalTok{(}\FunctionTok{across}\NormalTok{(}\AttributeTok{.fns =}\NormalTok{ as.numeric))    }
+\NormalTok{test }\OtherTok{\textless{}{-}}\NormalTok{ test }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{mutate}\NormalTok{(}\FunctionTok{across}\NormalTok{(}\AttributeTok{.fns =}\NormalTok{ as.numeric))    }
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{definingestimating-propensity-score-model}{%
+\section{Defining/Estimating Propensity Score
+Model}\label{definingestimating-propensity-score-model}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{covariateNames }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}
+    \StringTok{"X1RTHETK1"}\NormalTok{, }
+    \StringTok{"X1MTHETK1"}\NormalTok{,}
+    \StringTok{"X1TCHAPP"}\NormalTok{, }
+    \StringTok{"X1TCHCON"}\NormalTok{,}
+    \StringTok{"X1TCHPER"}\NormalTok{, }
+    \StringTok{"X1TCHEXT"}\NormalTok{,}
+    \StringTok{"X1TCHINT"}\NormalTok{,}
+    \StringTok{"X1ATTNFS"}\NormalTok{,}
+    \StringTok{"X1INBCNT"}\NormalTok{,}
+    \StringTok{"X12MOMAR"}\NormalTok{,}
+    \StringTok{"X1NUMSIB"}\NormalTok{, }
+    \StringTok{"P1OLDMOM"}\NormalTok{,}
+    \StringTok{"P1CHLDBK"}\NormalTok{,}
+    \StringTok{"P2DISTHM"}\NormalTok{,}
+    \StringTok{"P1NUMPLA"}\NormalTok{,}
+    \StringTok{"T2PARIN"}\NormalTok{,}
+    \StringTok{"X12PAR1ED\_I"}\NormalTok{,}
+    \StringTok{"X12PAR2ED\_I"}\NormalTok{,}
+    \StringTok{"X2INCCAT\_I"}\NormalTok{,}
+    \StringTok{"X1PAR1EMP"}\NormalTok{,}
+    \StringTok{"S2LUNCH"}\NormalTok{,}
+    \StringTok{"X2KRCETH"}\NormalTok{,}
+    \StringTok{"S2NGHBOR"}\NormalTok{,}
+    \StringTok{"S2OUTSID"}\NormalTok{,}
+    \StringTok{"S2USDABR"}\NormalTok{,}
+    \StringTok{"S2PUBSOC"}\NormalTok{,}
+    \StringTok{"X1LOCALE"}\NormalTok{,}
+    \StringTok{"S1\_ID"}\NormalTok{,}
+    \StringTok{"W1\_2P0PSU"}\NormalTok{,}
+    \StringTok{"prop.missing"}\NormalTok{)}
+
+\NormalTok{covariateNamesBART }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}
+    \StringTok{"X1RTHETK1"}\NormalTok{, }
+    \StringTok{"X1MTHETK1"}\NormalTok{,}
+    \StringTok{"X1TCHAPP"}\NormalTok{, }
+    \StringTok{"X1TCHCON"}\NormalTok{,}
+    \StringTok{"X1TCHPER"}\NormalTok{, }
+    \StringTok{"X1TCHEXT"}\NormalTok{,}
+    \StringTok{"X1TCHINT"}\NormalTok{,}
+    \StringTok{"X1ATTNFS"}\NormalTok{,}
+    \StringTok{"X1INBCNT"}\NormalTok{,}
+    \StringTok{"X12MOMAR"}\NormalTok{,}
+    \StringTok{"X1NUMSIB"}\NormalTok{, }
+    \StringTok{"P1OLDMOM"}\NormalTok{,}
+    \StringTok{"P1CHLDBK"}\NormalTok{,}
+    \StringTok{"P2DISTHM"}\NormalTok{,}
+    \StringTok{"P1NUMPLA"}\NormalTok{,}
+    \StringTok{"T2PARIN"}\NormalTok{,}
+    \StringTok{"X12PAR1ED\_I"}\NormalTok{,}
+    \StringTok{"X12PAR2ED\_I"}\NormalTok{,}
+    \StringTok{"X2INCCAT\_I"}\NormalTok{,}
+    \StringTok{"X1PAR1EMP"}\NormalTok{,}
+    \StringTok{"S2LUNCH"}\NormalTok{,}
+    \StringTok{"X2KRCETH"}\NormalTok{,}
+    \StringTok{"S2NGHBOR"}\NormalTok{,}
+    \StringTok{"S2OUTSID"}\NormalTok{,}
+    \StringTok{"S2USDABR"}\NormalTok{,}
+    \StringTok{"S2PUBSOC"}\NormalTok{,}
+    \StringTok{"X1LOCALE"}\NormalTok{)}
+
+\NormalTok{psFormula }\OtherTok{\textless{}{-}} \FunctionTok{paste}\NormalTok{(covariateNames, }\AttributeTok{collapse=}\StringTok{"+"}\NormalTok{)}
+\NormalTok{psFormula }\OtherTok{\textless{}{-}} \FunctionTok{formula}\NormalTok{(}\FunctionTok{paste}\NormalTok{(}\StringTok{"treated\textasciitilde{}"}\NormalTok{, psFormula, }\AttributeTok{sep=}\StringTok{""}\NormalTok{))}
+\FunctionTok{print}\NormalTok{(psFormula) }
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## treated ~ X1RTHETK1 + X1MTHETK1 + X1TCHAPP + X1TCHCON + X1TCHPER + 
+##     X1TCHEXT + X1TCHINT + X1ATTNFS + X1INBCNT + X12MOMAR + X1NUMSIB + 
+##     P1OLDMOM + P1CHLDBK + P2DISTHM + P1NUMPLA + T2PARIN + X12PAR1ED_I + 
+##     X12PAR2ED_I + X2INCCAT_I + X1PAR1EMP + S2LUNCH + X2KRCETH + 
+##     S2NGHBOR + S2OUTSID + S2USDABR + S2PUBSOC + X1LOCALE + S1_ID + 
+##     W1_2P0PSU + prop.missing
+\end{verbatim}
+
+\hypertarget{estimating-cates-using-machine-learning-methods}{%
+\section{Estimating CATEs Using Machine Learning
+Methods}\label{estimating-cates-using-machine-learning-methods}}
+
+\hypertarget{bart}{%
+\subsection{BART}\label{bart}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# estimating conditional average treatment effects (CATEs) using BART}
+
+\NormalTok{bart }\OtherTok{\textless{}{-}} \FunctionTok{bartc}\NormalTok{(}\AttributeTok{response =}\NormalTok{ train}\SpecialCharTok{$}\NormalTok{T2TTABS,}
+             \AttributeTok{treatment =}\NormalTok{ train}\SpecialCharTok{$}\NormalTok{treated,}
+             \AttributeTok{confounders =} \FunctionTok{data.frame}\NormalTok{(train[,covariateNamesBART]),}
+             \AttributeTok{method.rsp =} \StringTok{"bart"}\NormalTok{, }
+             \AttributeTok{method.trt =} \StringTok{"bart"}\NormalTok{,}
+             \AttributeTok{keepTrees =} \ConstantTok{TRUE}\NormalTok{,}
+             \AttributeTok{estimand =} \StringTok{"ate"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## fitting treatment model via method 'bart'
+## fitting response model via method 'bart'
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{cate }\OtherTok{\textless{}{-}} \FunctionTok{predict}\NormalTok{(bart,}
+               \AttributeTok{newdata =} \FunctionTok{data.frame}\NormalTok{(test[,covariateNamesBART]),}
+               \AttributeTok{type =} \StringTok{"icate"}\NormalTok{)}
+
+\NormalTok{cate\_m }\OtherTok{\textless{}{-}} \FunctionTok{apply}\NormalTok{(cate, }\DecValTok{2}\NormalTok{, mean) }
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{genericml}{%
+\subsection{GenericML}\label{genericml}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\DocumentationTok{\#\#\textquotesingle{} @Matt}
+
+\NormalTok{learners }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"random\_forest"}\NormalTok{, }\StringTok{"lasso"}\NormalTok{)}
+
+\NormalTok{matrix\_covs }\OtherTok{\textless{}{-}} \FunctionTok{as.matrix}\NormalTok{(data }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{select}\NormalTok{(}\FunctionTok{all\_of}\NormalTok{(covariateNames)) }\SpecialCharTok{\%\textgreater{}\%}
+                           \FunctionTok{mutate}\NormalTok{(}\FunctionTok{across}\NormalTok{(}\AttributeTok{.fns =}\NormalTok{ as.numeric))) }
+
+\NormalTok{X1 }\OtherTok{\textless{}{-}} \FunctionTok{setup\_X1}\NormalTok{(}\AttributeTok{funs\_Z =} \FunctionTok{c}\NormalTok{(}\StringTok{"B"}\NormalTok{, }\StringTok{"S"}\NormalTok{))}
+               \CommentTok{\#fixed\_effects = vil\_pair)}
+
+\NormalTok{vcov }\OtherTok{\textless{}{-}} \FunctionTok{setup\_vcov}\NormalTok{(}\AttributeTok{estimator =} \StringTok{"vcovHC"}\NormalTok{)}
+                   \CommentTok{\#arguments = list(cluster = demi\_paire))}
+
+\FunctionTok{library}\NormalTok{(parsnip)}
+\NormalTok{ps\_nnet }\OtherTok{\textless{}{-}} \FunctionTok{mlp}\NormalTok{(}\AttributeTok{mode =} \StringTok{"classification"}\NormalTok{,}
+               \AttributeTok{engine =} \StringTok{"nnet"}\NormalTok{,}
+\AttributeTok{hidden\_units =} \DecValTok{20}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{fit}\NormalTok{(psFormula,}
+      \AttributeTok{data =}\NormalTok{ data)}
+\NormalTok{data}\SpecialCharTok{$}\NormalTok{ps\_nnet }\OtherTok{\textless{}{-}} \FunctionTok{predict}\NormalTok{(ps\_nnet,}
+                      \AttributeTok{new\_data =}\NormalTok{ data,}
+                      \AttributeTok{type =} \StringTok{"prob"}\NormalTok{)[,}\DecValTok{2}\NormalTok{]}
+\NormalTok{data}\SpecialCharTok{$}\NormalTok{ps\_nnet }\OtherTok{\textless{}{-}}\NormalTok{ data}\SpecialCharTok{$}\NormalTok{ps\_nnet}\SpecialCharTok{$}\NormalTok{.pred\_1 }\DocumentationTok{\#\# remove the $column.name}
+
+\NormalTok{genML }\OtherTok{\textless{}{-}} \FunctionTok{GenericML}\NormalTok{(}
+  \AttributeTok{Z =}\NormalTok{ matrix\_covs, }\CommentTok{\#covariates}
+  \AttributeTok{D =} \FunctionTok{as.numeric}\NormalTok{(}\FunctionTok{as.character}\NormalTok{(data}\SpecialCharTok{$}\NormalTok{treated)), }\CommentTok{\#treatment}
+  \AttributeTok{Y =} \FunctionTok{as.numeric}\NormalTok{(data}\SpecialCharTok{$}\NormalTok{T2TTABS), }\CommentTok{\#outcome}
+  \AttributeTok{learners\_GenericML =}\NormalTok{ learners,  }\CommentTok{\# learners specified above}
+  \AttributeTok{learner\_propensity\_score =} \FunctionTok{as.numeric}\NormalTok{(data}\SpecialCharTok{$}\NormalTok{ps\_nnet), }\CommentTok{\#as.numeric(data$ps)  \#ps}
+  \AttributeTok{num\_splits =} \DecValTok{10}\NormalTok{,                        }\CommentTok{\# number splits of the data}
+  \AttributeTok{quantile\_cutoffs =} \FunctionTok{c}\NormalTok{(}\FloatTok{0.2}\NormalTok{, }\FloatTok{0.4}\NormalTok{, }\FloatTok{0.6}\NormalTok{, }\FloatTok{0.8}\NormalTok{), }\CommentTok{\# grouping for CATEs}
+  \AttributeTok{significance\_level =} \FloatTok{0.05}\NormalTok{,                }\CommentTok{\# significance level}
+  \AttributeTok{X1\_BLP =}\NormalTok{ X1, }\AttributeTok{X1\_GATES =}\NormalTok{ X1,               }\CommentTok{\# regression setup}
+  \AttributeTok{vcov\_BLP =}\NormalTok{ vcov, }\AttributeTok{vcov\_GATES =}\NormalTok{ vcov,       }\CommentTok{\# covariance setup}
+  \AttributeTok{parallel =}\NormalTok{ F, }\CommentTok{\#num\_cores = 6L, \# parallelization}
+  \AttributeTok{seed =} \DecValTok{20220621}\NormalTok{)                         }\CommentTok{\# RNG seed}
+
+\NormalTok{best }\OtherTok{\textless{}{-}} \FunctionTok{get\_best}\NormalTok{(genML)}
+\DocumentationTok{\#\# random\_forest is best, becomes the default for all future GenML functions}
+
+\NormalTok{base }\OtherTok{\textless{}{-}} \FunctionTok{get\_BLP}\NormalTok{(genML)}
+\DocumentationTok{\#\# Β2 is significant indicating treatment heterogeneity}
+
+\NormalTok{a }\OtherTok{\textless{}{-}} \FunctionTok{get\_GATES}\NormalTok{(genML) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{plot}\NormalTok{()}
+
+
+\CommentTok{\# Plot parental education}
+\NormalTok{b }\OtherTok{\textless{}{-}} \FunctionTok{get\_CLAN}\NormalTok{(genML,}
+         \AttributeTok{variable =} \StringTok{"X12PAR1ED\_I"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{plot}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \StringTok{"Heterogeneity by First Parents Education"}\NormalTok{,}
+       \AttributeTok{y =} \FunctionTok{str\_wrap}\NormalTok{(}\StringTok{"Average Value of Parental Education"}\NormalTok{, }\DecValTok{25}\NormalTok{))}
+
+\CommentTok{\# Plot family marriage status}
+\NormalTok{c }\OtherTok{\textless{}{-}} \FunctionTok{get\_CLAN}\NormalTok{(genML,}
+         \AttributeTok{variable =} \StringTok{"X12MOMAR"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{plot}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \StringTok{"Heterogeneity by Parental Marriage Status"}\NormalTok{,}
+       \AttributeTok{y =} \FunctionTok{str\_wrap}\NormalTok{(}\StringTok{"Average Value of Parental Marriage Status"}\NormalTok{, }\DecValTok{25}\NormalTok{))}
+
+
+\CommentTok{\# Plot lunch variable}
+\NormalTok{d }\OtherTok{\textless{}{-}} \FunctionTok{get\_CLAN}\NormalTok{(genML,}
+         \AttributeTok{variable =} \StringTok{"S2LUNCH"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{plot}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \StringTok{"Heterogeneity by Free School Lunch"}\NormalTok{,}
+       \AttributeTok{y =} \FunctionTok{str\_wrap}\NormalTok{(}\StringTok{"Average Value of Students Receiving Free Lunch"}\NormalTok{, }\DecValTok{25}\NormalTok{))}
+
+\CommentTok{\# Plot percent coming from neighborhood}
+\NormalTok{e }\OtherTok{\textless{}{-}} \FunctionTok{get\_CLAN}\NormalTok{(genML,}
+         \AttributeTok{variable =} \StringTok{"S2NGHBOR"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{plot}\NormalTok{() }\SpecialCharTok{+}
+  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \StringTok{"Heterogeneity by Percent of School coming from }
+\StringTok{       Surrounding Neighborhood"}\NormalTok{,}
+       \AttributeTok{y =} \FunctionTok{str\_wrap}\NormalTok{(}\StringTok{"Average Value of Percent Coming from Neighborhood"}\NormalTok{, }\DecValTok{25}\NormalTok{))}
+
+
+\FunctionTok{library}\NormalTok{(patchwork)}
+\NormalTok{layout }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"\#AA\#}
+\StringTok{            BBCC}
+\StringTok{            DDEE"}\NormalTok{)}
+\NormalTok{genMLplot}\OtherTok{\textless{}{-}}\NormalTok{ a }\SpecialCharTok{+}\NormalTok{ b }\SpecialCharTok{+}\NormalTok{ c }\SpecialCharTok{+}\NormalTok{ d }\SpecialCharTok{+}\NormalTok{ e }\SpecialCharTok{+}
+  \FunctionTok{plot\_layout}\NormalTok{(}\AttributeTok{design =}\NormalTok{ layout)}
+\end{Highlighting}
+\end{Shaded}
+
+\newpage
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{genMLplot}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{data_analysis_2_files/figure-latex/unnamed-chunk-1-1.pdf}
+\newpage \#\# causal forests
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#the grf package only takes numeric covariates}
+\NormalTok{data2 }\OtherTok{\textless{}{-}}\NormalTok{ data}
+\CommentTok{\#So convert those factor variables to be the numeric class}
+\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \DecValTok{1}\SpecialCharTok{:}\FunctionTok{length}\NormalTok{(covariateNames)) \{}
+  \ControlFlowTok{if}\NormalTok{(}\FunctionTok{class}\NormalTok{(data2[,covariateNames[i]])}\SpecialCharTok{==}\StringTok{"factor"}\NormalTok{)\{}
+\NormalTok{    data2[, covariateNames[i]] }\OtherTok{\textless{}{-}} \FunctionTok{as.numeric}\NormalTok{(}\FunctionTok{as.character}\NormalTok{(data2[,covariateNames[i]]))}
+\NormalTok{  \}}
+\NormalTok{\}}
+
+\CommentTok{\#Step 1: Split data into training data set and testing data set}
+\CommentTok{\#In this case, we split it to be 50/50}
+\FunctionTok{set.seed}\NormalTok{(}\DecValTok{123}\NormalTok{)}
+\NormalTok{train\_index }\OtherTok{\textless{}{-}} \FunctionTok{sample}\NormalTok{(}\DecValTok{1}\SpecialCharTok{:}\FunctionTok{nrow}\NormalTok{(data2), }\FunctionTok{nrow}\NormalTok{(data2)}\SpecialCharTok{/}\DecValTok{2}\NormalTok{)}
+\NormalTok{train\_index }\OtherTok{\textless{}{-}}\NormalTok{ train\_index[}\FunctionTok{order}\NormalTok{(train\_index)]}
+
+\NormalTok{train\_data }\OtherTok{\textless{}{-}}\NormalTok{ data2[train\_index,]}
+\NormalTok{test\_data }\OtherTok{\textless{}{-}}\NormalTok{ data2[}\SpecialCharTok{{-}}\NormalTok{train\_index,]}
+
+\CommentTok{\#Step 2: model fit, using causal forest}
+\CommentTok{\#Tuning mtry and min.node.size parameters by setting tune.parameters}
+\NormalTok{train.forest }\OtherTok{=} \FunctionTok{causal\_forest}\NormalTok{(}\AttributeTok{X=}\NormalTok{train\_data[,covariateNames],}
+                              \AttributeTok{Y =}\NormalTok{ train\_data}\SpecialCharTok{$}\NormalTok{X2MTHETK1, }\AttributeTok{num.trees =} \DecValTok{5000}\NormalTok{,}
+                              \AttributeTok{W =} \FunctionTok{as.numeric}\NormalTok{(}\FunctionTok{as.character}\NormalTok{(train\_data}\SpecialCharTok{$}\NormalTok{treated)),}
+                              \AttributeTok{W.hat =}\NormalTok{ train\_data}\SpecialCharTok{$}\NormalTok{ps,}
+                              \AttributeTok{tune.parameters =} \FunctionTok{c}\NormalTok{(}\StringTok{"mtry"}\NormalTok{, }\StringTok{"min.node.size"}\NormalTok{),}
+                              \AttributeTok{seed =} \DecValTok{0}\NormalTok{)}
+
+\NormalTok{train.forest[[}\StringTok{"tuning.output"}\NormalTok{]]}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Tuning status: tuned.
+## This indicates tuning found parameters that are expected to perform better than default. 
+## 
+## Predicted debiased error: 0.192235789762278
+## 
+## Tuned parameters: 
+## mtry: 12
+##  min.node.size: 1
+## 
+## Average error by 5-quantile:
+## 
+##     mtry     error
+##    [1,6] 0.1932963
+##   (6,11] 0.1932316
+##  (11,16] 0.1932540
+##  (16,21] 0.1932606
+##  (21,26] 0.1931298
+## 
+##  min.node.size     error
+##          [1,2] 0.1920488
+##          (2,9] 0.1926641
+##       (9,32.4] 0.1932746
+##     (32.4,124] 0.1939208
+##      (124,393] 0.1943589
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#The results showed that mtry = 16 and min.node.size = 1 perform better than the default setting}
+
+\CommentTok{\#Step 3: Obtain estimates of the conditional average treatment effect (CATE)}
+\CommentTok{\#with standard errors}
+\NormalTok{tau.hat }\OtherTok{=} \FunctionTok{predict}\NormalTok{(train.forest,}\AttributeTok{X=}\NormalTok{ test\_data[,covariateNames], }\AttributeTok{estimate.variance =}\NormalTok{ T)}
+\NormalTok{CATE\_causalForest }\OtherTok{=}\NormalTok{ tau.hat}\SpecialCharTok{$}\NormalTok{predictions}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{figures-for-three-separate-methods}{%
+\section{Figures for Three Separate
+Methods}\label{figures-for-three-separate-methods}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# \# BART}
+\CommentTok{\# ggplot(data, aes(x=logit\_scores, color = selfEmploy)) + }
+\CommentTok{\#   geom\_boxplot() + ggtitle("Logit Regression")}
+\CommentTok{\# }
+\CommentTok{\# \# GenericML}
+\CommentTok{\# ggplot(data, aes(x=forest\_scores, color = selfEmploy)) + }
+\CommentTok{\#   geom\_boxplot() + ggtitle("Random Forest")}
+\CommentTok{\# }
+\CommentTok{\# ggplot(data, aes(x=GBM\_scores, color = selfEmploy)) + }
+\CommentTok{\#   geom\_boxplot() + ggtitle("GBM")}
+
+\CommentTok{\# Causal Forests}
+\CommentTok{\#1. correlation matrix}
+\CommentTok{\#causal forest only output the best tunning parameters\textquotesingle{} model fit outcomes}
+\CommentTok{\#To answer Q2, I run one more model fit with mtry = 4 and min.node.size = 50}
+\NormalTok{train.forest2 }\OtherTok{=} \FunctionTok{causal\_forest}\NormalTok{(}\AttributeTok{X=}\NormalTok{train\_data[,covariateNames],}
+                              \AttributeTok{Y =}\NormalTok{ train\_data}\SpecialCharTok{$}\NormalTok{X2MTHETK1, }\AttributeTok{num.trees =} \DecValTok{5000}\NormalTok{,}
+                              \AttributeTok{W =} \FunctionTok{as.numeric}\NormalTok{(}\FunctionTok{as.character}\NormalTok{(train\_data}\SpecialCharTok{$}\NormalTok{treated)),}
+                              \AttributeTok{W.hat =}\NormalTok{ train\_data}\SpecialCharTok{$}\NormalTok{ps,}
+                              \AttributeTok{mtry =} \DecValTok{4}\NormalTok{, }\AttributeTok{min.node.size =} \DecValTok{50}\NormalTok{,}
+                              \AttributeTok{seed =} \DecValTok{0}\NormalTok{)}
+\NormalTok{tau.hat2 }\OtherTok{=} \FunctionTok{predict}\NormalTok{(train.forest2,}\AttributeTok{X=}\NormalTok{ test\_data[,covariateNames], }\AttributeTok{estimate.variance =}\NormalTok{ T)}
+\NormalTok{CATE2\_causalForest }\OtherTok{=}\NormalTok{ tau.hat2}\SpecialCharTok{$}\NormalTok{predictions}
+
+\FunctionTok{cor}\NormalTok{(CATE\_causalForest, CATE2\_causalForest)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.7788822
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#2.box plot}
+\FunctionTok{boxplot}\NormalTok{(CATE\_causalForest, CATE2\_causalForest)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{data_analysis_2_files/figure-latex/q_2-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#3.QQ plot}
+\FunctionTok{qqplot}\NormalTok{(CATE\_causalForest, CATE2\_causalForest)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{data_analysis_2_files/figure-latex/q_2-2.pdf}
+
+\hypertarget{determine-best-linear-projection-of-catevariable-importance}{%
+\section{Determine Best Linear Projection of CATE/Variable
+Importance}\label{determine-best-linear-projection-of-catevariable-importance}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#BART}
+
+
+\CommentTok{\#GenericML}
+
+
+\CommentTok{\#Causal Forests}
+\CommentTok{\#Step 1: Subset important variables}
+\NormalTok{importance\_cf }\OtherTok{=} \FunctionTok{variable\_importance}\NormalTok{(train.forest)}
+\FunctionTok{rownames}\NormalTok{(importance\_cf) }\OtherTok{=} \FunctionTok{names}\NormalTok{(train\_data[,covariateNames])}
+
+\CommentTok{\#select variables above the median of importance of the aggregated importances}
+\CommentTok{\#across imputed datasets}
+\NormalTok{important.var\_cf }\OtherTok{=} \FunctionTok{rownames}\NormalTok{(importance\_cf)[importance\_cf}\SpecialCharTok{\textgreater{}}\FunctionTok{median}\NormalTok{(importance\_cf)]}
+
+\CommentTok{\#Step 2}
+\CommentTok{\#run test forest}
+\NormalTok{test.forest }\OtherTok{=} \FunctionTok{causal\_forest}\NormalTok{(}\AttributeTok{X =}\NormalTok{ test\_data[,important.var\_cf],}
+                            \AttributeTok{Y =}\NormalTok{ test\_data}\SpecialCharTok{$}\NormalTok{X2MTHETK1,}
+                            \AttributeTok{W =} \FunctionTok{as.numeric}\NormalTok{(}\FunctionTok{as.character}\NormalTok{(test\_data}\SpecialCharTok{$}\NormalTok{treated)),}
+                            \AttributeTok{W.hat =}\NormalTok{ test\_data}\SpecialCharTok{$}\NormalTok{ps,}
+                            \AttributeTok{mtry =} \DecValTok{16}\NormalTok{, }\AttributeTok{num.trees=}\DecValTok{5000}\NormalTok{,}
+                            \AttributeTok{min.node.size =} \DecValTok{1}\NormalTok{, }\AttributeTok{seed =} \DecValTok{0}\NormalTok{)}
+
+\CommentTok{\#Step 3: Predict the conditional average treatment effect (CATE)}
+\NormalTok{tau.hat }\OtherTok{=} \FunctionTok{predict}\NormalTok{(test.forest,}\AttributeTok{X=}\NormalTok{ test\_data[,important.var\_cf], }\AttributeTok{estimate.variance =}\NormalTok{ T)}
+\NormalTok{CATE\_test }\OtherTok{=}\NormalTok{ tau.hat}\SpecialCharTok{$}\NormalTok{predictions}
+\FunctionTok{summary}\NormalTok{(CATE\_test)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##      Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+## -0.190572 -0.016740  0.009800  0.008658  0.035878  0.265934
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#When using the test data set and fitting the important variables,}
+ \CommentTok{\#the conditional ATE was small, which ranges from {-}0.401 to 0.254 with a mean of 0.018.}
+
+\FunctionTok{test\_calibration}\NormalTok{(test.forest)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Best linear fit using forest predictions (on held-out data)
+## as well as the mean forest prediction as regressors, along
+## with one-sided heteroskedasticity-robust (HC3) SEs:
+## 
+##                                Estimate Std. Error t value Pr(>t)
+## mean.forest.prediction          1.33876    1.52512  0.8778 0.1900
+## differential.forest.prediction  0.24307    0.42471  0.5723 0.2836
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#The outcomes showed that the coefficient of the mean forest prediction was 1 }
+ \CommentTok{\#which indicated the mean forest prediction was correct. }
+\CommentTok{\#Also, the results indicated no heterogeneity been detected.}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{two-most-important-cate-predictors-for-each-method-plot-catepredictor-relationship}{%
+\section{Two most important CATE predictors (For each method), plot
+CATE/predictor
+relationship}\label{two-most-important-cate-predictors-for-each-method-plot-catepredictor-relationship}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#BART}
+
+
+\CommentTok{\#GenericML}
+
+
+\CommentTok{\#Causal Forests}
+\CommentTok{\#The most two predictors are}
+\NormalTok{Top2predictors }\OtherTok{\textless{}{-}}\NormalTok{ importance\_cf[}\FunctionTok{order}\NormalTok{(importance\_cf, }\AttributeTok{decreasing =}\NormalTok{ T),][}\DecValTok{1}\SpecialCharTok{:}\DecValTok{2}\NormalTok{]}
+
+\CommentTok{\#Predictor 1}
+\NormalTok{groupX1MTHETK1 }\OtherTok{\textless{}{-}} \FunctionTok{quantile}\NormalTok{(test\_data[, }\FunctionTok{names}\NormalTok{(Top2predictors)[}\DecValTok{1}\NormalTok{]])}
+\NormalTok{test\_data}\SpecialCharTok{$}\NormalTok{groupX1M }\OtherTok{\textless{}{-}} \FunctionTok{ifelse}\NormalTok{(test\_data}\SpecialCharTok{$}\NormalTok{X1MTHETK1 }\SpecialCharTok{\textgreater{}=}\NormalTok{ groupX1MTHETK1[}\DecValTok{4}\NormalTok{], }\DecValTok{4}\NormalTok{, }
+                             \FunctionTok{ifelse}\NormalTok{(test\_data}\SpecialCharTok{$}\NormalTok{X1MTHETK1}\SpecialCharTok{\textgreater{}=}\NormalTok{groupX1MTHETK1[}\DecValTok{3}\NormalTok{] }\SpecialCharTok{\&}\NormalTok{ test\_data}\SpecialCharTok{$}\NormalTok{X1MTHETK1}\SpecialCharTok{\textless{}}\NormalTok{groupX1MTHETK1[}\DecValTok{4}\NormalTok{], }\DecValTok{3}\NormalTok{,}
+                                    \FunctionTok{ifelse}\NormalTok{(test\_data}\SpecialCharTok{$}\NormalTok{X1MTHETK1}\SpecialCharTok{\textgreater{}=}\NormalTok{groupX1MTHETK1[}\DecValTok{2}\NormalTok{] }\SpecialCharTok{\&}\NormalTok{ test\_data}\SpecialCharTok{$}\NormalTok{X1MTHETK1}\SpecialCharTok{\textless{}}\NormalTok{groupX1MTHETK1[}\DecValTok{3}\NormalTok{], }\DecValTok{2}\NormalTok{,}
+                                           \DecValTok{1}\NormalTok{)))}
+\NormalTok{test\_data}\SpecialCharTok{$}\NormalTok{groupX1M }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(test\_data}\SpecialCharTok{$}\NormalTok{groupX1M)}
+\FunctionTok{boxplot}\NormalTok{(CATE\_causalForest }\SpecialCharTok{\textasciitilde{}}\NormalTok{ test\_data}\SpecialCharTok{$}\NormalTok{groupX1M, }\AttributeTok{xlab =} \StringTok{"X1MTHETK1 Group"}\NormalTok{, }\AttributeTok{ylab =} \StringTok{"CATE"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{data_analysis_2_files/figure-latex/q_4-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#Predictor 2}
+\NormalTok{groupX1R }\OtherTok{\textless{}{-}} \FunctionTok{quantile}\NormalTok{(test\_data[, }\FunctionTok{names}\NormalTok{(Top2predictors)[}\DecValTok{2}\NormalTok{]])}
+\NormalTok{test\_data}\SpecialCharTok{$}\NormalTok{groupX1R }\OtherTok{\textless{}{-}} \FunctionTok{ifelse}\NormalTok{(test\_data}\SpecialCharTok{$}\NormalTok{X1RTHETK1 }\SpecialCharTok{\textgreater{}=}\NormalTok{ groupX1R[}\DecValTok{4}\NormalTok{], }\DecValTok{4}\NormalTok{, }
+                             \FunctionTok{ifelse}\NormalTok{(test\_data}\SpecialCharTok{$}\NormalTok{X1RTHETK1}\SpecialCharTok{\textgreater{}=}\NormalTok{groupX1R[}\DecValTok{3}\NormalTok{] }\SpecialCharTok{\&}\NormalTok{ test\_data}\SpecialCharTok{$}\NormalTok{X1RTHETK1}\SpecialCharTok{\textless{}}\NormalTok{groupX1R[}\DecValTok{4}\NormalTok{], }\DecValTok{3}\NormalTok{,}
+                                    \FunctionTok{ifelse}\NormalTok{(test\_data}\SpecialCharTok{$}\NormalTok{X1RTHETK1}\SpecialCharTok{\textgreater{}=}\NormalTok{groupX1R[}\DecValTok{2}\NormalTok{] }\SpecialCharTok{\&}\NormalTok{ test\_data}\SpecialCharTok{$}\NormalTok{X1RTHETK1}\SpecialCharTok{\textless{}}\NormalTok{groupX1R[}\DecValTok{3}\NormalTok{], }\DecValTok{2}\NormalTok{,}
+                                           \DecValTok{1}\NormalTok{)))}
+\NormalTok{test\_data}\SpecialCharTok{$}\NormalTok{groupX1R }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(test\_data}\SpecialCharTok{$}\NormalTok{groupX1R)}
+\FunctionTok{boxplot}\NormalTok{(CATE\_causalForest }\SpecialCharTok{\textasciitilde{}}\NormalTok{ test\_data}\SpecialCharTok{$}\NormalTok{groupX1R, }\AttributeTok{xlab =} \StringTok{"X1RTHETK1 Group"}\NormalTok{, }\AttributeTok{ylab =} \StringTok{"CATE"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{data_analysis_2_files/figure-latex/q_4-2.pdf}
+
+\end{document}
