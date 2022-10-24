@@ -19,21 +19,24 @@ data_dir <- file.path(".", "data")
 ## loading data
 load(file.path(data_dir, "chapter_10_data_cleaned_and_imputed.Rdata"))
 
-## making factored treatment variable 
-data <- data %>%
-  mutate(treated = as.factor(treated))
-    
+train <- data %>% 
+  sample_frac(size = 0.5)
+
+test <- anti_join(data, train)
+
+train <- train %>% mutate(across(.fns = as.numeric))    
+test <- test %>% mutate(across(.fns = as.numeric))    
 ```
 
 # Defining/Estimating Propensity Score Model
 
 ```{r pre q PSM model, echo = T, include = T, message=F, warning = F, error = F}
 
-covariateNames <- c(
+covariateNamesBART <- c(
     "X1RTHETK1", 
     "X1MTHETK1",
     "X1TCHAPP", 
-    "X1TCHCON ",
+    "X1TCHCON",
     "X1TCHPER", 
     "X1TCHEXT",
     "X1TCHINT",
@@ -57,15 +60,15 @@ covariateNames <- c(
     "S2USDABR",
     "S2PUBSOC",
     "X1LOCALE",
-    "prop.missing",
     "S1_ID",
-    "W1_2P0PSU")
+    "W1_2P0PSU",
+    "prop.missing")
 
-covariateNames2 <- c(
+covariateNamesBART <- c(
     "X1RTHETK1", 
     "X1MTHETK1",
     "X1TCHAPP", 
-    "X1TCHCON ",
+    "X1TCHCON",
     "X1TCHPER", 
     "X1TCHEXT",
     "X1TCHINT",
@@ -90,20 +93,6 @@ covariateNames2 <- c(
     "S2PUBSOC",
     "X1LOCALE")
     
-#obtain the propensity score formula   
-psFormula <- paste(covariateNames, collapse="+")
-psFormula <- formula(paste("treated~", psFormula, sep=""))
-print(psFormula)   
-
-ps_model = glm(psFormula, data = data, family = binomial)
-
-data$ps <- fitted(ps_model)
-
-n <- 999
-ps_matrix <- as.data.frame(data$ps)
-ps_matrix <- cbind(ps_matrix, rep(ps_matrix[1], n))
-ps_matrix <- as.matrix(ps_matrix)
-
 ```
 
 # Estimating CATEs Using Machine Learning Methods
@@ -112,15 +101,19 @@ ps_matrix <- as.matrix(ps_matrix)
 
 # estimating conditional average treatment effects (CATEs) using BART
 
-bart = bartc(response = T2TTABS, 
-            treatment = treated, 
-            ndpost = 1000,
-            confounders = as.matrix(covariateNames2), 
-            method.rsp = "p.weight", 
-            method.trt = ps_matrix, 
-            data = data, 
-            estimand = "ate")
+bart <- bartc(response = train$T2TTABS,
+             treatment = train$treated,
+             confounders = data.frame(train[,covariateNamesBART]),
+             method.rsp = "bart", 
+             method.trt = "bart",
+             keepTrees = TRUE,
+             estimand = "ate")
 
+cate <- predict(bart,
+               newdata = data.frame(test[,covariateNamesBART]),
+               type = "icate")
+
+cate_m <- apply(cate, 2, mean) 
 
 ```
 
