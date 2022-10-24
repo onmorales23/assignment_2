@@ -124,12 +124,14 @@ bart = bartc(response = T2TTABS,
 
 ```
 
-## genericML 
+## GenericML 
 ```{r q_1 genML, echo = T, include = T, message = F, warning = F, error = F}
+##' @Matt
 
 learners <- c("random_forest", "lasso")
 
-matrix_covs <- as.matrix(data %>% select(covariateNames))
+matrix_covs <- as.matrix(data %>% select(covariateNames) %>%
+                           mutate(across(.fns = as.numeric))) 
 
 X1 <- setup_X1(funs_Z = c("B", "S"))
                #fixed_effects = vil_pair)
@@ -137,19 +139,78 @@ X1 <- setup_X1(funs_Z = c("B", "S"))
 vcov <- setup_vcov(estimator = "vcovHC")
                    #arguments = list(cluster = demi_paire))
 
+library(parsnip)
+ps_nnet <- mlp(mode = "classification",
+               engine = "nnet",
+hidden_units = 20) %>%
+  fit(psFormula,
+      data = data)
+data$ps_nnet <- predict(ps_nnet,
+                      new_data = data,
+                      type = "prob")[,2]
+data$ps_nnet <- data$ps_nnet$.pred_1 ## remove the $column.name
+
 genML <- GenericML(
-  Z = matrix_covs, 
-  D = as.numeric(data$treated), 
-  Y = data$T2TTABS,                      # observed data z covs, d treat, y outcome
-  learners_GenericML = learners,            # learners
-  learner_propensity_score = ps_matrix,    # logit estimated ps above
-  num_splits = 100L,                        # number splits
-  quantile_cutoffs = c(0.2, 0.4, 0.6, 0.8), # grouping
+  Z = matrix_covs, #covariates
+  D = as.numeric(as.character(data$treated)), #treatment
+  Y = as.numeric(data$T2TTABS), #outcome
+  learners_GenericML = learners,  # learners specified above
+  learner_propensity_score = as.numeric(data$ps_nnet), #as.numeric(data$ps)  #ps
+  num_splits = 10,                        # number splits of the data
+  quantile_cutoffs = c(0.2, 0.4, 0.6, 0.8), # grouping for CATEs
   significance_level = 0.05,                # significance level
   X1_BLP = X1, X1_GATES = X1,               # regression setup
   vcov_BLP = vcov, vcov_GATES = vcov,       # covariance setup
   parallel = F, #num_cores = 6L, # parallelization
   seed = 20220621)                         # RNG seed
+
+get_best(genML)
+## random_forest is best, becomes the default for all future GenML functions
+
+get_BLP(genML)
+## β2 is significant indicating treatment heterogeneity
+
+a <- get_GATES(genML) %>%
+  plot()
+
+
+# Plot parental education
+b <- get_CLAN(genML,
+         variable = "X12PAR1ED_I") %>%
+  plot() +
+  labs(title = "Heterogeneity by First Parents Education",
+       y = str_wrap("Average Value of Parental Education", 25))
+
+# Plot family marriage status
+c <- get_CLAN(genML,
+         variable = "X12MOMAR") %>%
+  plot() +
+  labs(title = "Heterogeneity by Parental Marriage Status",
+       y = str_wrap("Average Value of Parental Marriage Status", 25))
+
+
+# Plot lunch variable
+d <- get_CLAN(genML,
+         variable = "S2LUNCH") %>%
+  plot() +
+  labs(title = "Heterogeneity by Free School Lunch",
+       y = str_wrap("Average Value of Students Receiving Free Lunch", 25))
+
+# Plot percent coming from neighborhood
+e <- get_CLAN(genML,
+         variable = "S2NGHBOR") %>%
+  plot() +
+  labs(title = "Heterogeneity by Percent of School coming from 
+       Surrounding Neighborhood",
+       y = str_wrap("Average Value of Percent Coming from Neighborhood", 25))
+
+
+library(patchwork)
+layout <- c("#AA#
+            BBCC
+            DDEE")
+a + b + c + d + e +
+  plot_layout(design = layout)
 
 ```
 
