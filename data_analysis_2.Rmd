@@ -1,0 +1,129 @@
+---
+title: "Data Analysis 2"
+output: pdf_document
+author: Ziying Li, Matt Capaldi, Yujuan Gao, Olivia Morales
+date: \today
+---
+
+```{r setup, echo=T, include=T, message=F, warning=F, error=F}
+
+## libraries
+libs <- c("tidyverse", "haven", "bibtex", "psych", "knitr", "pastecs", "kableExtra","survey", "cobalt", "randomForest", "ipred","rpart", "baguette", "parsnip", "SimDesign", "bartCause", "lme4", "grf", "genericML")
+
+sapply(libs, require, character.only = TRUE)
+
+## directory path (assignment_2 as current working directory)
+
+data_dir <- file.path(".", "data")
+
+## loading data
+load(file.path(data_dir, "chapter_10_data_cleaned_and_imputed.Rdata"))
+
+## making factored treatment variable 
+data <- data %>%
+  mutate(treated = as.factor(treated))
+    
+```
+
+# Defining/Estimating Propensity Score Model
+
+```{r pre q PSM model, echo = T, include = T, message=F, warning = F, error = F}
+
+covariateNames <- c(
+    "X1RTHETK1", 
+    "X1MTHETK1",
+    "X1TCHAPP", 
+    "X1TCHCON ",
+    "X1TCHPER", 
+    "X1TCHEXT",
+    "X1TCHINT",
+    "X1ATTNFS",
+    "X1INBCNT",
+    "X12MOMAR",
+    "X1NUMSIB", 
+    "P1OLDMOM",
+    "P1CHLDBK",
+    "P2DISTHM",
+    "P1NUMPLA",
+    "T2PARIN",
+    "X12PAR1ED_I",
+    "X12PAR2ED_I",
+    "X2INCCAT_I",
+    "X1PAR1EMP",
+    "S2LUNCH",
+    "X2KRCETH",
+    "S2NGHBOR",
+    "S2OUTSID",
+    "S2USDABR",
+    "S2PUBSOC",
+    "X1LOCALE",
+    "prop.missing",
+    "S1_ID",
+    "W1_2P0PSU")
+
+
+    
+#obtain the propensity score formula   
+psFormula <- paste(covariateNames, collapse="+")
+psFormula <- formula(paste("treated~", psFormula, sep=""))
+print(psFormula)   
+
+ps_model = glm(psFormula, data = data, family= binomial)
+
+data$ps <- fitted (ps_model)
+
+```
+
+# Estimating CATEs Using Machine Learning Methods
+## BART
+```{r q_1,BART, echo = T, include = T, message=F, warning = F, error = F}
+
+# estimating conditional average treatment effects (CATEs) using BART
+
+```
+
+## genericML 
+```{r q_1 genML, echo = T, include = T, message = F, warning = F, error = F}
+
+
+```
+
+
+## causal forests
+```{r q_1 CF, echo = T, include = T, message = F, warning = F, error = F}
+
+
+```
+
+# Figures for Three Separate Methods
+
+```{r q_2, echo = T, include = T, message = F, warning = F, error = F}
+
+# BART
+ggplot(data, aes(x=logit_scores, color = selfEmploy)) + 
+  geom_boxplot() + ggtitle("Logit Regression")
+
+# GenericML
+ggplot(data, aes(x=forest_scores, color = selfEmploy)) + 
+  geom_boxplot() + ggtitle("Random Forest")
+
+# Causal Forests
+ggplot(data, aes(x=GBM_scores, color = selfEmploy)) + 
+  geom_boxplot() + ggtitle("GBM")
+
+
+```
+
+# Determine Best Linear Projection of CATE/Variable Importance
+```{r q_3, echo = T, include = T, message = F, warning = F, error = F}
+
+
+```
+
+
+# Two most important CATE predictors (For each method), plot CATE/predictor relationship
+```{r q_4, echo = T, include = T, message = F, warning = F, error = F}
+
+
+```
+
