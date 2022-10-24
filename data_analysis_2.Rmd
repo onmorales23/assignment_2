@@ -3,7 +3,8 @@ title: "Data Analysis 2"
 output: pdf_document
 author: Ziying Li, Matt Capaldi, Yujuan Gao, Olivia Morales
 date: \today
-\usepackage{fontspec}
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, echo=T, include=T, message=F, warning=F, error=F}
@@ -95,7 +96,9 @@ print(psFormula)
 ```
 
 # Estimating CATEs Using Machine Learning Methods
+
 ## BART
+
 ```{r q_1,BART, echo = T, include = T, message= F, warning = F, error = F}
 
 # credit to Matt, esp for the covs matrices!
@@ -125,6 +128,47 @@ cate <- predict(bart,
 
 cate_m <- apply(cate, 2, mean) 
 
+
+
+
+
+library(bartMachine)
+
+bart_machine <- bartMachine(X=as.data.frame(matrix_covsBART), 
+                            y=cate_m,
+                            serialize = T, 
+                            mem_cache_for_speed = F)
+
+
+var.importance <- investigate_var_importance(bart_machine, 
+                                            num_replicates_for_avg = 25)
+
+#select variables whose importance is greater than the median
+important.vars = names(var.importance$avg_var_props)[
+  var.importance$avg_var_props > median(var.importance$avg_var_props)]
+
+test <- test %>% mutate(across(.fns = as.numeric))
+
+bart2 <- bartc(response = test$X2MTHETK1,
+              treatment = test$treated,
+              confounders = data.frame(test[,important.vars]),
+              #data = train, # don't specify the dataset if data is specified in each command
+              method.rsp = "bart",
+              method.trt = "bart",
+              estimand = "ate",
+              keepTrees = T) 
+
+cate2 <- predict(bart2,
+                newdata = data.frame(test[,important.vars]),
+                type = "icate")
+test$cate <- apply(cate2, 2, mean)
+
+
+model = paste(important.vars, collapse="+")
+model = paste(c("cate2",model), collapse="~")
+model.cate = lm(model,data = test)
+summary(model.cate)
+
 ```
 
 ```{r q_2,BART, echo = T, include = T, message= F, warning = F, error = F}
@@ -140,7 +184,9 @@ cate_m <- apply(cate, 2, mean)
 
 
 ```
-## GenericML 
+
+## GenericML
+
 ```{r q_1 genML, echo = T, include = T, message = F, warning = F, error = F}
 ##' @Matt
 learners <- c("random_forest", "lasso")
@@ -211,13 +257,17 @@ layout <- c("#AA#
 genMLplot<- a + b + c + d + e +
   plot_layout(design = layout)
 ```
+
 \newpage
+
 ```{r}
 genMLplot
 ```
+
 \newpage
 
 ## causal forests
+
 ```{r q_1 CF, echo = T, include = T, message = F, warning = F, error = F}
 #the grf package only takes numeric covariates
 data2 <- data
@@ -287,6 +337,7 @@ qqplot(CATE_causalForest, CATE2_causalForest)
 ```
 
 # Determine Best Linear Projection of CATE/Variable Importance
+
 ```{r q_3, echo = T, include = T, message = F, warning = F, error = F}
 #BART
 
@@ -328,8 +379,8 @@ test_calibration(test.forest)
 
 ```
 
-
 # Two most important CATE predictors (For each method), plot CATE/predictor relationship
+
 ```{r q_4, echo = T, include = T, message = F, warning = F, error = F}
 #BART
 
@@ -363,4 +414,3 @@ boxplot(CATE_causalForest ~ test_data$groupX1R, xlab = "X1RTHETK1 Group", ylab =
 
 
 ```
-
