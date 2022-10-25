@@ -170,9 +170,11 @@ summary(model.cate)
 
 # correlation matrix
 
+cor(bart2, cate2, method = c("pearson", "kendall", "spearman"))
 
 # qqplot 
 
+p<-gglot(sample = bart2, data = chapter_10_data_cleaned_and_imputed.Rdata, color=cyl)+theme_bw()
 
 
 
