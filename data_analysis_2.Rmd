@@ -45,7 +45,8 @@ covariateNames <- c(
     "X1LOCALE",
     "S1_ID",
     "W1_2P0PSU",
-    "prop.missing")
+    "prop.missing",
+    "X_CHSEX_R", "X_RACETH_R", "P1HSCALE")
 
 covariateNamesBART <- c(
     "X1RTHETK1", 
@@ -74,7 +75,8 @@ covariateNamesBART <- c(
     "S2OUTSID",
     "S2USDABR",
     "S2PUBSOC",
-    "X1LOCALE")
+    "X1LOCALE",
+    "X_CHSEX_R", "X_RACETH_R", "P1HSCALE")
 
 ## directory path (assignment_2 as current working directory)
 
@@ -205,6 +207,7 @@ bplot2 <- ggplot(test, aes(x = qpredvar_num, y = cate2)) +
 
 # GenericML
 
+### Q1)
 ```{r q_1 genML, echo = T, include = T, message = F, warning = F, error = F}
 ##' @Matt
 learners <- c("random_forest", "lasso")
@@ -216,6 +219,7 @@ vcov <- setup_vcov(estimator = "vcovHC")
                    #arguments = list(cluster = demi_paire))
 
 
+# Estimate ps scores (with 0.05/0.95 adjustment to work with GenML)
 library(parsnip)
 ps_rf <- rand_forest(mode = "classification",
                engine = "ranger",
@@ -230,10 +234,11 @@ data <- data %>%
   mutate(ps_rf = ifelse(ps_rf >= 0.95, 0.94, ps_rf), #Rounding to avoid error Dr. L
          ps_rf = ifelse(ps_rf <= 0.05, 0.06, ps_rf))
 
+# Run GenML
 genML <- GenericML(
   Z = matrix_covs, #covariates
   D = as.numeric(as.character(data$treated)), #treatment
-  Y = as.numeric(data$T2TTABS), #outcome
+  Y = as.numeric(data$X2MTHETK1), #outcome
   learners_GenericML = learners,  # learners specified above
   learner_propensity_score = as.numeric(data$ps_rf), #as.numeric(data$ps)  #ps
   num_splits = 10,                        # number splits of the data
@@ -248,6 +253,8 @@ best <- get_best(genML)
 ## random_forest is best, becomes the default for all future GenML functions
 base <- get_BLP(genML)
 ## significant indicating treatment heterogeneity
+
+
 a <- get_GATES(genML) %>%
   plot()
 # Plot parental education
@@ -276,14 +283,61 @@ e <- get_CLAN(genML,
        Surrounding Neighborhood",
        y = str_wrap("Average Value of Percent Coming from Neighborhood", 25))
 
+a
 ```
 
 \newpage
 
 ```{r, out.height = "49%"}
 library(patchwork)
-a
 (b+c)/(d+e)
+```
+
+### Q3)
+```{r}
+genML_het <- heterogeneity_CLAN(genML)
+
+genML_sig <- as.data.frame(genML_het$p_values) %>%
+  pivot_longer(cols = everything()) %>%
+  arrange(value)
+
+#Selecting variables above median importance
+genML_imps <- genML_sig %>%
+  filter(value > median(value)) %>%
+  select(name) %>%
+  as.list()
+genML_imps <- genML_imps[["name"]]
+
+# Create reduced covariates matrix
+matrix_covsGML2 <- as.matrix(data %>% select(all_of(genML_imps)) %>%
+                           mutate(across(.fns = as.numeric))) 
+
+# Calculate CATES using reduced covaraites
+genML_Q3 <- proxy_CATE(Z = matrix_covsGML2,
+                    D = as.numeric(as.character(data$treated)),
+                    Y = as.numeric(data$X2MTHETK1),
+                    A_set = sample(1:12684, size = 12684/2), #obs sample half
+                    learner = "random_forest")
+data$GenML_CATE2 <- genML_Q3$estimates$CATE
+
+```
+
+
+
+### 4)
+```{r}
+genML_sig %>% head(n = 2)
+# Show the 2 lowest p values of het, i.e. most significant predictors of het
+
+```
+
+
+
+
+
+
+```{r}
+
 ```
 
 \newpage
