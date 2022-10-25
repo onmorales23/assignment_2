@@ -208,6 +208,8 @@ bplot2 <- ggplot(test, aes(x = qpredvar_num, y = cate2)) +
 
 ```
 
+\newpage
+
 # GenericML
 
 ### Q1)
@@ -331,7 +333,7 @@ plot(data$GenML_CATEa, data$GenML_CATEr,
      xlab = "CATE with all vars")
 ```
 
-### 4)
+### Q4)
 
 Lastly, we draw back on the calculation of individual predictors of treatment and pull out the 2 with the lowest p-values, X1ATTNFS (focus scale) and X1TCHAPP (teacher approaches to learning). Below are the plots of these variable against the CATE.
 ```{r}
@@ -511,6 +513,8 @@ boxplot(CATE_causalForest ~ train_data$group2, xlab = paste(Top2predictors[2], "
 #Both two plots for two important predictors did not show an obvious different CATEs among groups.
 
 ```
+
+\newpage
 
 # Comparisons across Methods (Q2)
 ```{r  q2 supplementary, total, echo = T, include = T, message= F, warning = F, error = F}
