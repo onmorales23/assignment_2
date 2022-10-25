@@ -421,7 +421,7 @@ boxplot(CATE_causalForest, CATE2_causalForest)
 #3.QQ plot
 qqplot(CATE_causalForest, CATE2_causalForest)
 
-
+#The correlation between the two tunning methods was strong. But the distributions of CATEs between these two tunning methods were slightly different (see box plot), which caused a nonlinear QQ plot.
 ```
 
 # Determine Best Linear Projection of CATE/Variable Importance (Causal Forests)
@@ -453,6 +453,7 @@ CATE.prediction = best_linear_projection(test.forest, A=predictors)
 CATE.prediction
 
 #The results showed no significant differences in each covariate (p > 0.05).
+#check the herterogeneity
 test_calibration(test.forest)
 #The outcomes showed that the coefficient of the mean forest prediction was 1 
  #which indicated the mean forest prediction was correct. 
@@ -493,6 +494,7 @@ train_data$group2 <- ifelse(train_data[,Top2predictors[2]] >= group2[4], 4,
 train_data$group2 <- factor(train_data$group2)
 boxplot(CATE_causalForest ~ train_data$group2, xlab = paste(Top2predictors[2], "Group"), ylab = "CATE")
 
+#Both two plots for two important predictors did not show an obvious different CATEs among groups.
 
 ```
 
