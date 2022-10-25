@@ -255,19 +255,16 @@ e <- get_CLAN(genML,
   labs(title = "Heterogeneity by Percent of School coming from 
        Surrounding Neighborhood",
        y = str_wrap("Average Value of Percent Coming from Neighborhood", 25))
-library(patchwork)
-layout <- c("#AA#
-            BBCC
-            DDEE")
-genMLplot<- a + b + c + d + e +
-  plot_layout(design = layout)
 
 ```
 
 \newpage
 
 ```{r}
-genMLplot
+library(patchwork)
+a
+b+c
+d+e
 ```
 
 \newpage
