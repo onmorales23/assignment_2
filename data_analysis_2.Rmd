@@ -283,8 +283,7 @@ e <- get_CLAN(genML,
 ```{r, out.height = "49%"}
 library(patchwork)
 a
-b+c
-d+e
+(b+c)/(d+e)
 ```
 
 \newpage
