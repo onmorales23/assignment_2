@@ -1,6 +1,7 @@
 ---
 title: "Data Analysis 2"
-output: pdf_document
+output: 
+  pdf_document
 author: Ziying Li, Matt Capaldi, Yujuan Gao, Olivia Morales
 date: \today
 editor_options: 
@@ -191,22 +192,28 @@ X1 <- setup_X1(funs_Z = c("B", "S"))
                #fixed_effects = vil_pair)
 vcov <- setup_vcov(estimator = "vcovHC")
                    #arguments = list(cluster = demi_paire))
+
+
 library(parsnip)
-ps_nnet <- mlp(mode = "classification",
-               engine = "nnet",
-hidden_units = 20) %>%
+ps_rf <- rand_forest(mode = "classification",
+               engine = "ranger",
+               trees = 1000) %>%
   fit(psFormula,
       data = data)
-data$ps_nnet <- predict(ps_nnet,
+data$ps_rf <- predict(ps_rf,
                       new_data = data,
                       type = "prob")[,2]
-data$ps_nnet <- data$ps_nnet$.pred_1 ## remove the $column.name
+data$ps_rf <- data$ps_rf$.pred_1 ## remove the $column.name
+data <- data %>%
+  mutate(ps_rf = ifelse(ps_rf >= 0.95, 0.94, ps_rf), #Rounding to avoid error Dr. L
+         ps_rf = ifelse(ps_rf <= 0.05, 0.55, ps_rf))
+
 genML <- GenericML(
   Z = matrix_covs, #covariates
   D = as.numeric(as.character(data$treated)), #treatment
   Y = as.numeric(data$T2TTABS), #outcome
   learners_GenericML = learners,  # learners specified above
-  learner_propensity_score = as.numeric(data$ps_nnet), #as.numeric(data$ps)  #ps
+  learner_propensity_score = as.numeric(data$ps_rf), #as.numeric(data$ps)  #ps
   num_splits = 10,                        # number splits of the data
   quantile_cutoffs = c(0.2, 0.4, 0.6, 0.8), # grouping for CATEs
   significance_level = 0.05,                # significance level
@@ -214,10 +221,11 @@ genML <- GenericML(
   vcov_BLP = vcov, vcov_GATES = vcov,       # covariance setup
   parallel = F, #num_cores = 6L, # parallelization
   seed = 20220621)                         # RNG seed
+
 best <- get_best(genML)
 ## random_forest is best, becomes the default for all future GenML functions
 base <- get_BLP(genML)
-## Β2 is significant indicating treatment heterogeneity
+## significant indicating treatment heterogeneity
 a <- get_GATES(genML) %>%
   plot()
 # Plot parental education
@@ -251,6 +259,7 @@ layout <- c("#AA#
             DDEE")
 genMLplot<- a + b + c + d + e +
   plot_layout(design = layout)
+
 ```
 
 \newpage
