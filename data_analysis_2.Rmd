@@ -129,9 +129,6 @@ cate <- predict(bart,
 cate_m <- apply(cate, 2, mean) 
 
 
-
-
-
 library(bartMachine)
 
 bart_machine <- bartMachine(X=as.data.frame(matrix_covsBART), 
@@ -148,25 +145,25 @@ important.vars = names(var.importance$avg_var_props)[
   var.importance$avg_var_props > median(var.importance$avg_var_props)]
 
 test <- test %>% mutate(across(.fns = as.numeric))
+test$treated <- test$treated - 1
 
 bart2 <- bartc(response = test$X2MTHETK1,
               treatment = test$treated,
               confounders = data.frame(test[,important.vars]),
-              #data = train, # don't specify the dataset if data is specified in each command
               method.rsp = "bart",
-              method.trt = "bart",
+              method.trt = "glm",
               estimand = "ate",
               keepTrees = T) 
 
 cate2 <- predict(bart2,
                 newdata = data.frame(test[,important.vars]),
                 type = "icate")
-test$cate <- apply(cate2, 2, mean)
 
+test$cate2 <- apply(cate2, 2, mean)
 
-model = paste(important.vars, collapse="+")
-model = paste(c("cate2",model), collapse="~")
-model.cate = lm(model,data = test)
+model <- paste(important.vars, collapse="+")
+model <- paste(c("cate2",model), collapse="~")
+model.cate <- lm(model,data = test)
 summary(model.cate)
 
 ```
