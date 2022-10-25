@@ -544,6 +544,6 @@ GenericML failed to find any evidence of treatment heterogeneity on the math sco
 
 Causal Forest (CF) did not fit very well with the data set. Because when using the training data set, CF with the best tunning parameters detected heterogeneity, but it failed to detect heterogeneity by using the testing data set. When plotting the top two important predictors with CATE, we found no difference between groups.
 
-In summary, this paper attempeted to explore treatment effect heterogeneity with Causal Forests, GenericML, and Causal BART. Unfortunately, there was no significant heterogeneity to be found in terms of math score outcome. All three methods came to similar conclusions.
+In summary, this paper attempted to explore treatment effect heterogeneity with Causal Forests, GenericML, and Causal BART. Unfortunately, there was no significant heterogeneity to be found in terms of math score outcome. All three methods came to similar conclusions.
 
 ```{r Code Junkyard, eval=FALSE}
