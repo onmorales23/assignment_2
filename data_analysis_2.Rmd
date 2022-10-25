@@ -91,7 +91,7 @@ for (var in covariateNames) {
 
 ```
 
-In this paper, we explore heterogeneity of treatment using three different methods; CausalBART, GenericML, and CausalForest. We will explore the heterogeneity (answer the assignment questions) separately for each model before concluding and comparing the findings at the conclusion of the paper.
+In this paper, we explore heterogeneity of treatment using three different methods; CausalBART, GenericML, and CausalForest. We will explore the heterogeneity (Questions 1, 3, and 4) separately for each model before concluding and comparing CATES (Question 2) at the conclusion of the paper.
 
 ```{r pre q PSM model, echo = T, include = T, message=F, warning = F, error = F}
 
@@ -208,20 +208,23 @@ bplot2 <- ggplot(test, aes(x = qpredvar_num, y = cate2)) +
 
 ```
 
-
 # GenericML
 
 ### Q1)
+Initially, we set up the hyper-parameters for GenericML. We decided to use the learners ranger (with 300 trees, for a balance of efficiency and effectiveness), and lasso with the default settings as a comparison.
+
+As GenericML is set up to be used on experimental data and therefore does not accept propensity scores outside of 0.05 and 0.95, propensity scores were calculated and then rounded at the extreme ends to avoid this issue.
+
+The other primary hyperparameter we were concerned with was the num_splits argument in the GenericML function (how many times the data is split for recalculating), which was set to 10. This again was  chosen for a balance efficiency and effectiveness.
+
 ```{r q_1 genML, echo = T, include = T, message = F, warning = F, error = F}
-##' @Matt
-learners <- c("random_forest", "lasso")
+
+# Setup for GML
+learners <- c("mlr3::lrn('ranger', num.trees = 300)", "lasso")
 matrix_covs <- as.matrix(data %>% select(all_of(covariateNames)) %>%
                            mutate(across(.fns = as.numeric))) 
 X1 <- setup_X1(funs_Z = c("B", "S"))
-               #fixed_effects = vil_pair)
 vcov <- setup_vcov(estimator = "vcovHC")
-                   #arguments = list(cluster = demi_paire))
-
 
 # Estimate ps scores (with 0.05/0.95 adjustment to work with GenML)
 library(parsnip)
@@ -238,7 +241,7 @@ data <- data %>%
   mutate(ps_rf = ifelse(ps_rf >= 0.95, 0.94, ps_rf), #Rounding to avoid error Dr. L
          ps_rf = ifelse(ps_rf <= 0.05, 0.06, ps_rf))
 
-# Run GenML
+# Run initial GenML
 genML <- GenericML(
   Z = matrix_covs, #covariates
   D = as.numeric(as.character(data$treated)), #treatment
@@ -252,52 +255,39 @@ genML <- GenericML(
   vcov_BLP = vcov, vcov_GATES = vcov,       # covariance setup
   parallel = F, #num_cores = 6L, # parallelization
   seed = 20220621)                         # RNG seed
-
-best <- get_best(genML)
-## random_forest is best, becomes the default for all future GenML functions
-base <- get_BLP(genML)
-## significant indicating treatment heterogeneity
-
-
-a <- get_GATES(genML) %>%
-  plot()
-# Plot parental education
-b <- get_CLAN(genML,
-         variable = "X12PAR1ED_I") %>%
-  plot() +
-  labs(title = "Heterogeneity by First Parents Education",
-       y = str_wrap("Average Value of Parental Education", 25))
-# Plot family marriage status
-c <- get_CLAN(genML,
-         variable = "X12MOMAR") %>%
-  plot() +
-  labs(title = "Heterogeneity by Parental Marriage Status",
-       y = str_wrap("Average Value of Parental Marriage Status", 25))
-# Plot lunch variable
-d <- get_CLAN(genML,
-         variable = "S2LUNCH") %>%
-  plot() +
-  labs(title = "Heterogeneity by Free School Lunch",
-       y = str_wrap("Average Value of Students Receiving Free Lunch", 25))
-# Plot percent coming from neighborhood
-e <- get_CLAN(genML,
-         variable = "S2NGHBOR") %>%
-  plot() +
-  labs(title = "Heterogeneity by Percent of School coming from 
-       Surrounding Neighborhood",
-       y = str_wrap("Average Value of Percent Coming from Neighborhood", 25))
-
-a
 ```
 
-\newpage
+As the below printouts show, the best ranger performed more effectively than lasso, and therefore, the results calculated with ranger become the default for the rest of the analysis
+```{r}
+get_best(genML)
+## ranger is best, becomes the default for all future GenML functions
+```
 
-```{r, out.height = "49%"}
-library(patchwork)
-(b+c)/(d+e)
+Unlike when initially calculating heterogeneity on attendance, GenML does not find evidence of significant heterogeneity when looking at spring math scores. For the purpose of the assignment however, we continue analyzing as if there was heterogeneity to be explored.
+```{r}
+get_BLP(genML)
+## (no longer) significant indicating treatment heterogeneity
+```
+
+```{r}
+get_GATES(genML)
+```
+
+The below code predicts CATEs with all covariates for use in Q2 at the end of the paper.
+```{r}
+# Predict CATEs with full dataset for plotting/comparison
+genML_Q2 <- proxy_CATE(Z = matrix_covs,
+                    D = as.numeric(as.character(data$treated)),
+                    Y = as.numeric(data$X2MTHETK1),
+                    A_set = sample(1:12684, size = 12684/2), #obs sample half
+                    learner = "mlr3::lrn('ranger', num.trees = 300)")
+data$GenML_CATEa <- genML_Q2$estimates$CATE
+
 ```
 
 ### Q3)
+The next stage for GenericML took a workaround to best imitate the variable importance or BartMachine functions of the other two methods. Using heterogeneity_CLAN() we were able to get the p-values for each variable in terms of covariates in terms of their influence on heterogeneity.
+
 ```{r}
 genML_het <- heterogeneity_CLAN(genML)
 
@@ -305,13 +295,18 @@ genML_sig <- as.data.frame(genML_het$p_values) %>%
   pivot_longer(cols = everything()) %>%
   arrange(value)
 
-#Selecting variables above median importance
+# Selecting variables above median significance
 genML_imps <- genML_sig %>%
-  filter(value > median(value)) %>%
+  filter(value < median(value)) %>%
   select(name) %>%
   as.list()
 genML_imps <- genML_imps[["name"]]
+```
 
+Then, a new covariate matrix was created with only variables whose p-value was less than the median of all. As there is no directly comparable function to variable importance in causal forests and bart machine for causal bart, this was our best approximation of a simialr concept.
+
+We then recalculated CATEs with only these reduced covariates.
+```{r}
 # Create reduced covariates matrix
 matrix_covsGML2 <- as.matrix(data %>% select(all_of(genML_imps)) %>%
                            mutate(across(.fns = as.numeric))) 
@@ -321,28 +316,47 @@ genML_Q3 <- proxy_CATE(Z = matrix_covsGML2,
                     D = as.numeric(as.character(data$treated)),
                     Y = as.numeric(data$X2MTHETK1),
                     A_set = sample(1:12684, size = 12684/2), #obs sample half
-                    learner = "random_forest")
-data$GenML_CATE2 <- genML_Q3$estimates$CATE
-
+                    learner = "mlr3::lrn('ranger', num.trees = 300)")
+data$GenML_CATEr <- genML_Q3$estimates$CATE
 ```
 
+The resulting CATEs are summarized below. These results indicate that there is some variation, however, as noted above the omnibus test failed to find significant heterogeneity, so cannot assume this variation is anything other than noise. The correlation between the reduced and all variable CATE is 0.49 indicating a moderate relationship as demonstrated by the plot provided below as well
+```{r}
+summary(data$GenML_CATEr)
 
+cor(data$GenML_CATEa, data$GenML_CATEr)
+plot(data$GenML_CATEa, data$GenML_CATEr,
+     main = "Comparing CATEs from GenML",
+     ylab = "CATE with imp vars only",
+     xlab = "CATE with all vars")
+```
 
 ### 4)
+
+Lastly, we draw back on the calculation of individual predictors of treatment and pull out the 2 with the lowest p-values, X1ATTNFS (focus scale) and X1TCHAPP (teacher approaches to learning). Below are the plots of these variable against the CATE.
 ```{r}
 genML_sig %>% head(n = 2)
 # Show the 2 lowest p values of het, i.e. most significant predictors of het
 
+a <- ggplot(data) +
+  geom_point(aes(x = X1ATTNFS,
+                 y = GenML_CATEa)) +
+  labs(y = "CATE",
+       x = "Focus Scale")
+
+
+b <- ggplot(data) +
+  geom_point(aes(x = X1TCHAPP,
+                 y = GenML_CATEa)) +
+  labs(y = "CATE",
+       x = "Teacher Approach")
+
+library(patchwork)
+a + b
+
 ```
 
-
-
-
-
-
-```{r}
-
-```
+Even though these variables were identified as the mostly likely contributors to treatment heterogeneity, the 2 plots show quite there is no clear relationship to be seen between them and the CATE, supporting the finding that GenericML suggests there is no treatment heterogeneity.
 
 \newpage
 
@@ -491,22 +505,23 @@ boxplot(CATE_causalForest ~ train_data$groupX1R, xlab = paste(names(Top2predicto
 
 ```
 
-# Comparisons across Methods
+# Comparisons across Methods (Q2)
 ```{r  q2 supplementary, total, echo = T, include = T, message= F, warning = F, error = F}
 
-labels = c("BART", "Causal Forests")
+labels = c("BART", "Causal Forests", "GenericML")
 
 # correlation matrix
 
-cor(cate_m, CATE_causalForest)
+cor(cate_m, CATE_causalForest, data$GenML_CATEa)
 
 # qqplot 
 
-cate_comp <- qqplot(cate_m, CATE_causalForest)
+cate_comp <- qqplot(cate_m, CATE_causalForest, data$GenML_CATEa)
 
 # boxplot 
 
-cate_com_box <- boxplot(cate_m, CATE_causalForest, names = labels, ylab = "CATE")
+cate_com_box <- boxplot(cate_m, CATE_causalForest, data$GenML_CATEa,
+                        names = labels, ylab = "CATE")
   
 ```
 
@@ -514,11 +529,10 @@ cate_com_box <- boxplot(cate_m, CATE_causalForest, names = labels, ylab = "CATE"
 
 Insert BART conclusion
 
-Insert GenericML conclusion
+GenericML failed to find any evidence of treatment heterogeneity on the math score outcome variable. The p-value of the omnibus test for heterogeneity was 0.58, so not even close to marginal significance. The CATEs calculated with all vars and only important vars were loosely similar to each other. The two most important variables still showed no real evidence of treatment heterogeneity.
 
 Causal Forest (CF) did not fit very well with the data set. Because when using the training data set, CF with the best tunning parameters detected heterogeneity, but it failed to detect heterogeneity by using the testing data set. When plotting the top two important variables with CATE, we found a small difference between groups.
 
+In summary, this paper attempeted to explore treatment effect heterogeneity with Causal Forests, GenericML, and Causal BART. Unfortunately, there was no significant heterogeneity to be found in terms of math score outcome. All three methods came to similar conclusions.
 
-Comparison
-
-In summary,
+```{r Code Junkyard, eval=FALSE}
