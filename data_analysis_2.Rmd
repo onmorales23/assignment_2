@@ -446,14 +446,13 @@ test.forest = causal_forest(X = test_data[,important.var_cf],
                             mtry = 22, num.trees=5000,
                             min.node.size = 1, seed = 0)
 
-#Step 3: Predict the conditional average treatment effect (CATE)
-tau.hat = predict(test.forest,X= test_data[,important.var_cf], estimate.variance = T)
-CATE_test = tau.hat$predictions
-summary(CATE_test)
+#Step 3: Estimate the best linear projection of a conditional average treatment effect using a causal forest
+predictors = test_data[,important.var_cf]
 
-#When using the test data set and fitting the important variables,
- #the conditional ATE was small, which ranges from -0.4 to 0.2 with a mean of 0.018.
+CATE.prediction = best_linear_projection(test.forest, A=predictors)
+CATE.prediction
 
+#The results showed no significant differences in each covariate (p > 0.05).
 test_calibration(test.forest)
 #The outcomes showed that the coefficient of the mean forest prediction was 1 
  #which indicated the mean forest prediction was correct. 
