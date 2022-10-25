@@ -426,7 +426,7 @@ boxplot(CATE_causalForest ~ test_data$groupX1R, xlab = "X1RTHETK1 Group", ylab =
 ```
 
 # Comparisons across Methods
-```{r  q2 supplementray, total, echo = T, include = T, message= F, warning = F, error = F}
+```{r  q2 supplementary, total, echo = T, include = T, message= F, warning = F, error = F}
 
 labels = c("BART", "Causal Forests")
 
