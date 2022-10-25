@@ -467,25 +467,31 @@ test_calibration(test.forest)
 ```{r q_4, echo = T, include = T, message = F, warning = F, error = F}
 
 #The most two predictors are
-Top2predictors <- importance_cf[order(importance_cf, decreasing = T),][1:2]
+Top2predictors <- c("X1TCHEXT", "P1OLDMOM")
+
+#Obtain estimates of the conditional average treatment effect (CATE)
+#with standard errors
+tau.hat = predict(test.forest,X= test_data[,important.var_cf], estimate.variance = T)
+CATE_causalForest = tau.hat$predictions
+
 
 #Predictor 1
-groupX1MTHETK1 <- quantile(train_data[, names(Top2predictors)[1]])
-train_data$groupX1M <- ifelse(train_data[,names(Top2predictors)[1]] >= groupX1MTHETK1[4], 4, 
-                             ifelse(train_data[,names(Top2predictors)[1]]>=groupX1MTHETK1[3] & train_data[,names(Top2predictors)[1]]<groupX1MTHETK1[4], 3,
-                                    ifelse(train_data[,names(Top2predictors)[1]]>=groupX1MTHETK1[2] & train_data[,names(Top2predictors)[1]]<groupX1MTHETK1[3], 2,
+group1 <- quantile(train_data[, Top2predictors[1]])
+train_data$groupX1M <- ifelse(train_data[,Top2predictors[1]] >= group1[4], 4, 
+                             ifelse(train_data[,Top2predictors[1]]>=group1[3] & train_data[,Top2predictors[1]]<group1[4], 3,
+                                    ifelse(train_data[,Top2predictors[1]]>=group1[2] & train_data[,Top2predictors[1]]<group1[3], 2,
                                            1)))
 train_data$groupX1M <- factor(train_data$groupX1M)
-boxplot(CATE_causalForest ~ train_data$groupX1M, xlab = paste(names(Top2predictors)[1], "Group"), ylab = "CATE")
+boxplot(CATE_causalForest ~ train_data$groupX1M, xlab = paste(Top2predictors[1], "Group"), ylab = "CATE")
 
 #Predictor 2
-groupX1R <- quantile(train_data[, names(Top2predictors)[2]])
-train_data$groupX1R <- ifelse(train_data[,names(Top2predictors)[2]] >= groupX1R[4], 4, 
-                             ifelse(train_data[,names(Top2predictors)[2]]>=groupX1R[3] & train_data[,names(Top2predictors)[2]]<groupX1R[4], 3,
-                                    ifelse(train_data[,names(Top2predictors)[2]]>=groupX1R[2] & train_data[,names(Top2predictors)[2]]<groupX1R[3], 2,
+group2 <- quantile(train_data[, Top2predictors[2]])
+train_data$group2 <- ifelse(train_data[,Top2predictors[2]] >= group2[4], 4, 
+                             ifelse(train_data[,Top2predictors[2]]>=group2[3] & train_data[,Top2predictors[2]]<group2[4], 3,
+                                    ifelse(train_data[,Top2predictors[2]]>=group2[2] & train_data[,Top2predictors[2]]<group2[3], 2,
                                            1)))
-train_data$groupX1R <- factor(train_data$groupX1R)
-boxplot(CATE_causalForest ~ train_data$groupX1R, xlab = paste(names(Top2predictors)[2], "Group"), ylab = "CATE")
+train_data$group2 <- factor(train_data$group2)
+boxplot(CATE_causalForest ~ train_data$group2, xlab = paste(Top2predictors[2], "Group"), ylab = "CATE")
 
 
 ```
@@ -515,7 +521,7 @@ Insert BART conclusion
 
 Insert GenericML conclusion
 
-Causal Forest (CF) did not fit very well with the data set. Because when using the training data set, CF with the best tunning parameters detected heterogeneity, but it failed to detect heterogeneity by using the testing data set. When plotting the top two important variables with CATE, we found a small difference between groups.
+Causal Forest (CF) did not fit very well with the data set. Because when using the training data set, CF with the best tunning parameters detected heterogeneity, but it failed to detect heterogeneity by using the testing data set. When plotting the top two important predictors with CATE, we found no difference between groups.
 
 
 Comparison
