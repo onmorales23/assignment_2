@@ -342,14 +342,16 @@ genML_sig %>% head(n = 2)
 
 a <- ggplot(data) +
   geom_point(aes(x = X1ATTNFS,
-                 y = GenML_CATEa)) +
+                 y = GenML_CATEa),
+             alpha = 0.8) +
   labs(y = "CATE",
        x = "Focus Scale")
 
 
 b <- ggplot(data) +
   geom_point(aes(x = X1TCHAPP,
-                 y = GenML_CATEa)) +
+                 y = GenML_CATEa),
+             alpha = 0.8) +
   labs(y = "CATE",
        x = "Teacher Approach")
 
@@ -527,11 +529,13 @@ cor(cate_m, CATE_causalForest, data$GenML_CATEa)
 
 # qqplot 
 
-cate_comp <- qqplot(cate_m, CATE_causalForest, data$GenML_CATEa)
+qqplot(cate_m, CATE_causalForest)
+qqplot(cate_m, data$GenML_CATEa)
+qqplot(CATE_causalForest, data$GenML_CATEa)
 
 # boxplot 
 
-cate_com_box <- boxplot(cate_m, CATE_causalForest, data$GenML_CATEa,
+boxplot(cate_m, CATE_causalForest, data$GenML_CATEa,
                         names = labels, ylab = "CATE")
   
 ```
@@ -543,6 +547,8 @@ Insert BART conclusion
 GenericML failed to find any evidence of treatment heterogeneity on the math score outcome variable. The p-value of the omnibus test for heterogeneity was 0.58, so not even close to marginal significance. The CATEs calculated with all vars and only important vars were loosely similar to each other. The two most important variables still showed no real evidence of treatment heterogeneity.
 
 Causal Forest (CF) did not fit very well with the data set. Because when using the training data set, CF with the best tunning parameters detected heterogeneity, but it failed to detect heterogeneity by using the testing data set. When plotting the top two important predictors with CATE, we found no difference between groups.
+
+Comparing CATEs estimated between methods we found
 
 In summary, this paper attempted to explore treatment effect heterogeneity with Causal Forests, GenericML, and Causal BART. Unfortunately, there was no significant heterogeneity to be found in terms of math score outcome. All three methods came to similar conclusions.
 
