@@ -11,7 +11,7 @@ editor_options:
 ```{r setup, echo=T, include=T, message=F, warning=F, error=F}
 
 ## libraries
-libs <- c("tidyverse", "haven", "bibtex", "psych", "knitr", "pastecs", "kableExtra","survey", "cobalt", "randomForest", "ipred","rpart", "baguette", "parsnip", "SimDesign", "bartCause", "lme4", "grf", "GenericML", "car")
+libs <- c("tidyverse", "haven", "bibtex", "psych", "knitr", "pastecs", "kableExtra","survey", "cobalt", "randomForest", "ipred","rpart", "baguette", "parsnip", "SimDesign", "bartCause", "lme4", "grf", "GenericML", "car", "bartMachine", "gtools")
 
 sapply(libs, require, character.only = TRUE)
 
@@ -85,7 +85,7 @@ load(file.path(data_dir, "chapter_10_data_cleaned_and_imputed.Rdata"))
 
 ```
 
-In this paper, we explore heterogeneity of treatment using three different methods; CausalBART, GenericML, and CausalForest. We will explore the heterogeneity (answer the assginment questions) separately for each model before concluding and comparing the findings at the conclusion of the paper.
+In this paper, we explore heterogeneity of treatment using three different methods; CausalBART, GenericML, and CausalForest. We will explore the heterogeneity (answer the assignment questions) separately for each model before concluding and comparing the findings at the conclusion of the paper.
 
 ```{r pre q PSM model, echo = T, include = T, message=F, warning = F, error = F}
 
@@ -167,6 +167,8 @@ summary(model.cate)
 
 ```
 
+
+
 ```{r q_2,BART, echo = T, include = T, message= F, warning = F, error = F}
 
 # correlation matrix
@@ -178,10 +180,28 @@ cor(bart2, cate2, method = c("pearson", "kendall", "spearman"))
 plot1 <- gglot(sample = bart2, data = chapter_10_data_cleaned_and_imputed.Rdata, color=cyl)+theme_bw()
 
 
+```
 
+# Two most important CATE predictors (BART), plot CATE/predictor relationship
 
+```{r q_4,BART, echo = T, include = T, message= F, warning = F, error = F}
+
+## top 2 predictors
+top.pred <- c("X1TCHINT", "X1NUMSIB")
+
+qpredvar_tch <- quantcut(test$X1TCHINT, na.rm = TRUE)
+qpredvar_num <-  quantcut(test$X1NUMSIB, na.rm = TRUE)
+
+## plot relationship
+
+bplot1 <- ggplot(test, aes(x = qpredvar_tch, y = cate2)) +
+  geom_boxplot()
+
+bplot2 <- ggplot(test, aes(x = qpredvar_num, y = cate2)) +
+  geom_boxplot()
 
 ```
+
 
 # GenericML
 
@@ -313,8 +333,9 @@ CATE_causalForest = tau.hat$predictions
 
 ```
 
+# Figures Comparing Different CF fits
 
-```{r q_2, echo = T, include = T, message = F, warning = F, error = F}
+```{r q_2 CF, echo = T, include = T, message = F, warning = F, error = F}
 
 
 # Causal Forests
@@ -341,7 +362,7 @@ qqplot(CATE_causalForest, CATE2_causalForest)
 
 ```
 
-### Determine Best Linear Projection of CATE/Variable Importance
+# Determine Best Linear Projection of CATE/Variable Importance (Causal Forests)
 
 ```{r q_3, echo = T, include = T, message = F, warning = F, error = F}
 
@@ -379,11 +400,10 @@ test_calibration(test.forest)
 
 ```
 
-### Two most important CATE predictors (For each method), plot CATE/predictor relationship
+# Two most important CATE predictors (Causal Forests), plot CATE/predictor relationship
+
 
 ```{r q_4, echo = T, include = T, message = F, warning = F, error = F}
-
-
 
 #Causal Forests
 #The most two predictors are
@@ -407,6 +427,25 @@ test_data$groupX1R <- ifelse(test_data$X1RTHETK1 >= groupX1R[4], 4,
 test_data$groupX1R <- factor(test_data$groupX1R)
 boxplot(CATE_causalForest ~ test_data$groupX1R, xlab = "X1RTHETK1 Group", ylab = "CATE")
 
+```
+
+# Comparisons across Methods
+```{r  q2 supplementray, total, echo = T, include = T, message= F, warning = F, error = F}
+
+labels = c("BART", "Causal Forests")
+
+# correlation matrix
+
+cor(cate_m, CATE_causalForest)
+
+# qqplot 
+
+cate_comp <- qqplot(cate_m, CATE_causalForest)
+
+# boxplot 
+
+cate_com_box <- boxplot(cate_m, CATE_causalForest, names = labels, ylab = "CATE")
+  
 ```
 
 # Method Comparisons and Conclusion
