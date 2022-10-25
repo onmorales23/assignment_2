@@ -173,11 +173,11 @@ summary(model.cate)
 
 # correlation matrix
 
-cor(bart2, cate2, method = c("pearson", "kendall", "spearman"))
+# cor(bart2, cate2, method = c("pearson", "kendall", "spearman"))
 
 # qqplot 
 
-plot1 <- gglot(sample = bart2, data = chapter_10_data_cleaned_and_imputed.Rdata, color=cyl)+theme_bw()
+# plot1 <- gglot(sample = bart2, data = chapter_10_data_cleaned_and_imputed.Rdata, color=cyl)+theme_bw()
 
 
 ```
@@ -228,7 +228,7 @@ data$ps_rf <- predict(ps_rf,
 data$ps_rf <- data$ps_rf$.pred_1 ## remove the $column.name
 data <- data %>%
   mutate(ps_rf = ifelse(ps_rf >= 0.95, 0.94, ps_rf), #Rounding to avoid error Dr. L
-         ps_rf = ifelse(ps_rf <= 0.05, 0.55, ps_rf))
+         ps_rf = ifelse(ps_rf <= 0.05, 0.06, ps_rf))
 
 genML <- GenericML(
   Z = matrix_covs, #covariates
@@ -280,7 +280,7 @@ e <- get_CLAN(genML,
 
 \newpage
 
-```{r}
+```{r, out.height = "49%"}
 library(patchwork)
 a
 b+c
