@@ -83,6 +83,10 @@ data_dir <- file.path(".", "data")
 ## loading data
 load(file.path(data_dir, "chapter_10_data_cleaned_and_imputed.Rdata"))
 
+#standardized continuous predictors
+for (var in covariateNames) {
+  if (class(data[,var])!="factor") { data[,var] = (data[,var]-mean(data[,var]))/sd(data[,var]) } }
+
 ```
 
 In this paper, we explore heterogeneity of treatment using three different methods; CausalBART, GenericML, and CausalForest. We will explore the heterogeneity (answer the assignment questions) separately for each model before concluding and comparing the findings at the conclusion of the paper.
@@ -291,8 +295,16 @@ a
 # Causal Forests
 
 ```{r q_1 CF, echo = T, include = T, message = F, warning = F, error = F}
-#the grf package only takes numeric covariates
+
 data2 <- data
+
+#fit logistic regression model for propensity score estimation ignoring clustering
+ps.model0 <- glm(psFormula, data=data2, family=binomial)
+
+#obtain propensity scores that ignore clustering
+data2$ps <- fitted(ps.model0)
+
+#the grf package only takes numeric covariates
 #So convert those factor variables to be the numeric class
 for (i in 1:length(covariateNames)) {
   if(class(data2[,covariateNames[i]])=="factor"){
@@ -318,13 +330,9 @@ train.forest = causal_forest(X=train_data[,covariateNames],
                               tune.parameters = c("mtry", "min.node.size"),
                               seed = 0)
 
+#The best tunning parameters of mtry and min.node.size were shown below, which indicated a better performance than the default setting
 train.forest[["tuning.output"]]
-#The results showed that mtry = 16 and min.node.size = 1 perform better than the default setting
 
-#Step 3: Obtain estimates of the conditional average treatment effect (CATE)
-#with standard errors
-tau.hat = predict(train.forest,X= test_data[,covariateNames], estimate.variance = T)
-CATE_causalForest = tau.hat$predictions
 
 
 ```
@@ -332,6 +340,10 @@ CATE_causalForest = tau.hat$predictions
 # Figures Comparing Different CF fits
 
 ```{r q_2 CF, echo = T, include = T, message = F, warning = F, error = F}
+#Obtain estimates of the conditional average treatment effect (CATE)
+#with standard errors
+tau.hat = predict(train.forest,X= test_data[,covariateNames], estimate.variance = T)
+CATE_causalForest = tau.hat$predictions
 
 
 # Causal Forests
@@ -372,12 +384,12 @@ rownames(importance_cf) = names(train_data[,covariateNames])
 important.var_cf = rownames(importance_cf)[importance_cf>median(importance_cf)]
 
 #Step 2
-#run test forest
+#run test forest with the best hyperparameters
 test.forest = causal_forest(X = test_data[,important.var_cf],
                             Y = test_data$X2MTHETK1,
                             W = as.numeric(as.character(test_data$treated)),
                             W.hat = test_data$ps,
-                            mtry = 16, num.trees=5000,
+                            mtry = 22, num.trees=5000,
                             min.node.size = 1, seed = 0)
 
 #Step 3: Predict the conditional average treatment effect (CATE)
@@ -386,7 +398,7 @@ CATE_test = tau.hat$predictions
 summary(CATE_test)
 
 #When using the test data set and fitting the important variables,
- #the conditional ATE was small, which ranges from -0.401 to 0.254 with a mean of 0.018.
+ #the conditional ATE was small, which ranges from -0.4 to 0.2 with a mean of 0.018.
 
 test_calibration(test.forest)
 #The outcomes showed that the coefficient of the mean forest prediction was 1 
@@ -401,27 +413,27 @@ test_calibration(test.forest)
 
 ```{r q_4, echo = T, include = T, message = F, warning = F, error = F}
 
-#Causal Forests
 #The most two predictors are
 Top2predictors <- importance_cf[order(importance_cf, decreasing = T),][1:2]
 
 #Predictor 1
-groupX1MTHETK1 <- quantile(test_data[, names(Top2predictors)[1]])
-test_data$groupX1M <- ifelse(test_data$X1MTHETK1 >= groupX1MTHETK1[4], 4, 
-                             ifelse(test_data$X1MTHETK1>=groupX1MTHETK1[3] & test_data$X1MTHETK1<groupX1MTHETK1[4], 3,
-                                    ifelse(test_data$X1MTHETK1>=groupX1MTHETK1[2] & test_data$X1MTHETK1<groupX1MTHETK1[3], 2,
+groupX1MTHETK1 <- quantile(train_data[, names(Top2predictors)[1]])
+train_data$groupX1M <- ifelse(train_data[,names(Top2predictors)[1]] >= groupX1MTHETK1[4], 4, 
+                             ifelse(train_data[,names(Top2predictors)[1]]>=groupX1MTHETK1[3] & train_data[,names(Top2predictors)[1]]<groupX1MTHETK1[4], 3,
+                                    ifelse(train_data[,names(Top2predictors)[1]]>=groupX1MTHETK1[2] & train_data[,names(Top2predictors)[1]]<groupX1MTHETK1[3], 2,
                                            1)))
-test_data$groupX1M <- factor(test_data$groupX1M)
-boxplot(CATE_causalForest ~ test_data$groupX1M, xlab = "X1MTHETK1 Group", ylab = "CATE")
+train_data$groupX1M <- factor(train_data$groupX1M)
+boxplot(CATE_causalForest ~ train_data$groupX1M, xlab = paste(names(Top2predictors)[1], "Group"), ylab = "CATE")
 
 #Predictor 2
-groupX1R <- quantile(test_data[, names(Top2predictors)[2]])
-test_data$groupX1R <- ifelse(test_data$X1RTHETK1 >= groupX1R[4], 4, 
-                             ifelse(test_data$X1RTHETK1>=groupX1R[3] & test_data$X1RTHETK1<groupX1R[4], 3,
-                                    ifelse(test_data$X1RTHETK1>=groupX1R[2] & test_data$X1RTHETK1<groupX1R[3], 2,
+groupX1R <- quantile(train_data[, names(Top2predictors)[2]])
+train_data$groupX1R <- ifelse(train_data[,names(Top2predictors)[2]] >= groupX1R[4], 4, 
+                             ifelse(train_data[,names(Top2predictors)[2]]>=groupX1R[3] & train_data[,names(Top2predictors)[2]]<groupX1R[4], 3,
+                                    ifelse(train_data[,names(Top2predictors)[2]]>=groupX1R[2] & train_data[,names(Top2predictors)[2]]<groupX1R[3], 2,
                                            1)))
-test_data$groupX1R <- factor(test_data$groupX1R)
-boxplot(CATE_causalForest ~ test_data$groupX1R, xlab = "X1RTHETK1 Group", ylab = "CATE")
+train_data$groupX1R <- factor(train_data$groupX1R)
+boxplot(CATE_causalForest ~ train_data$groupX1R, xlab = paste(names(Top2predictors)[2], "Group"), ylab = "CATE")
+
 
 ```
 
@@ -450,7 +462,8 @@ Insert BART conclusion
 
 Insert GenericML conclusion
 
-Insert Causal Forest conclusion
+Causal Forest (CF) did not fit very well with the data set. Because when using the training data set, CF with the best tunning parameters detected heterogeneity, but it failed to detect heterogeneity by using the testing data set. When plotting the top two important variables with CATE, we found a small difference between groups.
+
 
 Comparison
 
