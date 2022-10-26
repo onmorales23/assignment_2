@@ -217,7 +217,7 @@ bplot1 + bplot2
 
 From the previous estimations of variable importance, we found that T2PARIN and X1NUMSIB were the two most significant predictors (according to their relative inclusion proportion in the BART model). The two plots demonstrate a similar lack of heterogeneity, as there is no identifiable relationship between the estimates and the two predictors.
 
-note: the X1NUMSIB variable was previously standardized, that's why the plots are divided into not the most helpful quartiles.
+note: the X1NUMSIB variable was previously standardized, that's why the plots are divided into not the most informative quartiles.
 
 \newpage
 
