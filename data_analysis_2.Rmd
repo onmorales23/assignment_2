@@ -385,6 +385,8 @@ Even though these variables were identified as the mostly likely contributors to
 
 # Causal Forests
 
+### Q1)
+
 ```{r q_1 CF, echo = T, include = T, message = F, warning = F, error = F}
 
 data2 <- data
@@ -421,14 +423,15 @@ train.forest = causal_forest(X=train_data[,covariateNames],
                               tune.parameters = c("mtry", "min.node.size"),
                               seed = 0)
 
-#The best tunning parameters of mtry and min.node.size were shown below, which indicated a better performance than the default setting
+#The best tunning parameters of mtry and min.node.size were shown below, 
+ #which indicated a better performance than the default setting
 train.forest[["tuning.output"]]
 
 
 
 ```
 
-# Figures Comparing Different CF fits
+### Q2) Correlation and Figures Comparing Different CF fits
 
 ```{r q_2 CF, echo = T, include = T, message = F, warning = F, error = F}
 #Obtain estimates of the conditional average treatment effect (CATE)
@@ -458,10 +461,13 @@ boxplot(CATE_causalForest, CATE2_causalForest)
 #3.QQ plot
 qqplot(CATE_causalForest, CATE2_causalForest)
 
-#The correlation between the two tunning methods was strong. But the distributions of CATEs between these two tunning methods were slightly different (see box plot), which caused a nonlinear QQ plot.
+
 ```
 
-# Determine Best Linear Projection of CATE/Variable Importance (Causal Forests)
+The correlation between the two tunning methods was strong. But the distributions of CATEs between these two tunning methods were slightly different (see box plot), which caused a nonlinear QQ plot.
+
+
+### Q3) Determine Best Linear Projection of CATE/Variable Importance
 
 ```{r q_3, echo = T, include = T, message = F, warning = F, error = F}
 
@@ -480,60 +486,74 @@ test.forest = causal_forest(X = test_data[,important.var_cf],
                             Y = test_data$X2MTHETK1,
                             W = as.numeric(as.character(test_data$treated)),
                             W.hat = test_data$ps,
-                            mtry = 22, num.trees=5000,
+                            mtry = 16, num.trees=5000,
                             min.node.size = 1, seed = 0)
 
-#Step 3: Estimate the best linear projection of a conditional average treatment effect using a causal forest
+#Step 3: Estimate the best linear projection of CATE
 predictors = test_data[,important.var_cf]
 
 CATE.prediction = best_linear_projection(test.forest, A=predictors)
 CATE.prediction
 
-#The results showed no significant differences in each covariate (p > 0.05).
-#check the herterogeneity
+#The predictor has a p-value smaller than 0.05,
+ # which indicates the existence of heterogeneity.
+ 
+#Further check the herterogeneity
 test_calibration(test.forest)
+
 #The outcomes showed that the coefficient of the mean forest prediction was 1 
  #which indicated the mean forest prediction was correct. 
-#Also, the results indicated no heterogeneity been detected.
+ 
+#Also, the results indicated that no heterogeneity 
+ #had been detected in the overall selected covariates.
 
 
 ```
 
-# Two most important CATE predictors (Causal Forests), plot CATE/predictor relationship
+### Q4) Two most important CATE predictors (Causal Forests), plot CATE/predictor relationship
 
 
 ```{r q_4, echo = T, include = T, message = F, warning = F, error = F}
 
 #The most two predictors are
-Top2predictors <- c("X1TCHEXT", "P1OLDMOM")
+Top2predictors <- c("X1TCHEXT", "X1TCHPER")
 
 #Obtain estimates of the conditional average treatment effect (CATE)
 #with standard errors
-tau.hat = predict(test.forest,X= test_data[,important.var_cf], estimate.variance = T)
+tau.hat = predict(test.forest,X= test_data[,important.var_cf], 
+estimate.variance = T)
 CATE_causalForest = tau.hat$predictions
 
 
 #Predictor 1
 group1 <- quantile(train_data[, Top2predictors[1]])
 train_data$groupX1M <- ifelse(train_data[,Top2predictors[1]] >= group1[4], 4, 
-                             ifelse(train_data[,Top2predictors[1]]>=group1[3] & train_data[,Top2predictors[1]]<group1[4], 3,
-                                    ifelse(train_data[,Top2predictors[1]]>=group1[2] & train_data[,Top2predictors[1]]<group1[3], 2,
+                             ifelse(train_data[,Top2predictors[1]]>=group1[3] & 
+                             train_data[,Top2predictors[1]]<group1[4], 3,
+                                    ifelse(train_data[,Top2predictors[1]]>=group1[2] & 
+                                    train_data[,Top2predictors[1]]<group1[3], 2,
                                            1)))
 train_data$groupX1M <- factor(train_data$groupX1M)
-boxplot(CATE_causalForest ~ train_data$groupX1M, xlab = paste(Top2predictors[1], "Group"), ylab = "CATE")
+boxplot(CATE_causalForest ~ train_data$groupX1M, 
+xlab = paste(Top2predictors[1], "Group"), ylab = "CATE")
 
 #Predictor 2
 group2 <- quantile(train_data[, Top2predictors[2]])
 train_data$group2 <- ifelse(train_data[,Top2predictors[2]] >= group2[4], 4, 
-                             ifelse(train_data[,Top2predictors[2]]>=group2[3] & train_data[,Top2predictors[2]]<group2[4], 3,
-                                    ifelse(train_data[,Top2predictors[2]]>=group2[2] & train_data[,Top2predictors[2]]<group2[3], 2,
+                             ifelse(train_data[,Top2predictors[2]]>=group2[3] & 
+                             train_data[,Top2predictors[2]]<group2[4], 3,
+                                    ifelse(train_data[,Top2predictors[2]]>=group2[2] & 
+                                    train_data[,Top2predictors[2]]<group2[3], 2,
                                            1)))
 train_data$group2 <- factor(train_data$group2)
-boxplot(CATE_causalForest ~ train_data$group2, xlab = paste(Top2predictors[2], "Group"), ylab = "CATE")
+boxplot(CATE_causalForest ~ train_data$group2, 
+xlab = paste(Top2predictors[2], "Group"), ylab = "CATE")
 
-#Both two plots for two important predictors did not show an obvious different CATEs among groups.
 
 ```
+
+Both two plots for two important predictors did not show an obvious different CATEs among groups.
+
 
 \newpage
 
