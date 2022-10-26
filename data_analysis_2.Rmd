@@ -206,6 +206,8 @@ bplot1 <- ggplot(test, aes(x = qpredvar_tch, y = cate2)) +
 bplot2 <- ggplot(test, aes(x = qpredvar_num, y = cate2)) +
   geom_boxplot()
 
+library(patchwork)
+bplot1 + bplot2
 ```
 
 \newpage
@@ -284,6 +286,10 @@ genML_Q2 <- proxy_CATE(Z = matrix_covs,
                     A_set = sample(1:12684, size = 12684/2), #obs sample half
                     learner = "mlr3::lrn('ranger', num.trees = 300)")
 data$GenML_CATEa <- genML_Q2$estimates$CATE
+# proxy_CATE builds model with half but then provides estimates for all, so need to 
+# cut down to half sample to compare with other methods later. No better method
+# appears to be available
+GenML_CATEhalf <- sample(data$GenML_CATEa, 6342)
 
 ```
 
@@ -327,7 +333,7 @@ The resulting CATEs are summarized below. These results indicate that there is s
 summary(data$GenML_CATEr)
 
 cor(data$GenML_CATEa, data$GenML_CATEr)
-plot(data$GenML_CATEa, data$GenML_CATEr,
+qqplot(data$GenML_CATEa, data$GenML_CATEr,
      main = "Comparing CATEs from GenML",
      ylab = "CATE with imp vars only",
      xlab = "CATE with all vars")
@@ -525,17 +531,19 @@ labels = c("BART", "Causal Forests", "GenericML")
 
 # correlation matrix
 
-cor(cate_m, CATE_causalForest, data$GenML_CATEa)
+cor(cate_m, CATE_causalForest)
+cor(cate_m, GenML_CATEhalf)
+cor(CATE_causalForest, GenML_CATEhalf)
 
 # qqplot 
 
 qqplot(cate_m, CATE_causalForest)
-qqplot(cate_m, data$GenML_CATEa)
-qqplot(CATE_causalForest, data$GenML_CATEa)
+qqplot(cate_m, GenML_CATEhalf)
+qqplot(CATE_causalForest, GenML_CATEhalf)
 
 # boxplot 
 
-boxplot(cate_m, CATE_causalForest, data$GenML_CATEa,
+boxplot(cate_m, CATE_causalForest, GenML_CATEhalf,
                         names = labels, ylab = "CATE")
   
 ```
@@ -544,11 +552,11 @@ boxplot(cate_m, CATE_causalForest, data$GenML_CATEa,
 
 Insert BART conclusion
 
-GenericML failed to find any evidence of treatment heterogeneity on the math score outcome variable. The p-value of the omnibus test for heterogeneity was 0.58, so not even close to marginal significance. The CATEs calculated with all vars and only important vars were loosely similar to each other. The two most important variables still showed no real evidence of treatment heterogeneity.
+GenericML failed to find any evidence of treatment heterogeneity on the math score outcome variable. The p-value of the omnibus test for heterogeneity was 0.41, so not even close to marginal significance. The CATEs calculated with all vars and only important vars were loosely similar to each other. The two most important variables still showed no real evidence of treatment heterogeneity.
 
 Causal Forest (CF) did not fit very well with the data set. Because when using the training data set, CF with the best tunning parameters detected heterogeneity, but it failed to detect heterogeneity by using the testing data set. When plotting the top two important predictors with CATE, we found no difference between groups.
 
-Comparing CATEs estimated between methods we found
+Comparing CATEs estimated between methods we found there was surprisingly little correlation between any of the methods. Although they all predicted a CATE average close to 0, BART and Causal Forest had much narrower spreads than GenericML. This may have been in part due to the more awkward nature of pulling the CATE out GenericML, as it is not available from the primary GenericML object and needs a separate calculation.
 
 In summary, this paper attempted to explore treatment effect heterogeneity with Causal Forests, GenericML, and Causal BART. Unfortunately, there was no significant heterogeneity to be found in terms of math score outcome. All three methods came to similar conclusions.
 
