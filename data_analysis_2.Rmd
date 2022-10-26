@@ -191,7 +191,7 @@ qplot <- qqplot(test$cate, test$cate2, xlab = "Full Model", ylab = "Important Va
 
 ```
 
-Especially from the boxplot, it seems that the CATEs of the important variables model were slightly enhanced but not substantively. From the correlation matrix, there is a very weak correlation noted (~0.38).
+Especially from the boxplot, it seems that the CATEs of the important variables model were slightly enhanced but not substantively. From the correlation matrix, there is a weak correlation noted (~0.38).
 
 # Two most important CATE predictors (BART), plot CATE/predictor relationship
 
