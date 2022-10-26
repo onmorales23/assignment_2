@@ -180,43 +180,41 @@ blabels = c("Full Model", "Important Variables Only")
 
 # correlation matrix
 
-cor <- cor(test$cate, test$cate2)
+cor(test$cate, test$cate2)
 
-# boxplot
-
+#boxplot
 plot1 <- boxplot(test$cate, test$cate2, names = blabels, ylab = "CATEs")
 
 # qqplot
-
 qplot <- qqplot(test$cate, test$cate2, xlab = "Full Model", ylab = "Important Vars")
 
-cor + plot1 + qplot
 ```
 
-Especially from the boxplot, it seems that the CATEs of the important variables model were slightly enhanced but not substantively. From the correlation matrix, there is a very weak correlation noted (~0.21).
+Especially from the boxplot, it seems that the CATEs of the important variables model were slightly enhanced but not substantively. From the correlation matrix, there is a very weak correlation noted (~0.38).
 
 # Two most important CATE predictors (BART), plot CATE/predictor relationship
 
 ```{r q_4,BART, echo = T, include = T, message= F, warning = F, error = F}
 
 ## top 2 predictors
-top.pred <- c("T2PARIN", "X1TCHCON")
+top.pred <- c("T2PARIN", "X1NUMSIB")
 
-cut <- quantcut(test$T2PARIN, q = 4, na.rm = TRUE)
-
+cut <- quantcut(test$X1NUMSIB, q = 4, na.rm = T)
+  
 ## plot relationship
 
-bplot1 <- ggplot(test, aes(x = cut, y = cate2)) +
-  geom_boxplot() + labs(y = "CATEs")
+bplot1 <- ggplot(test, aes(x = as.factor(T2PARIN), y = cate2)) +
+  geom_boxplot() + labs(y = "CATEs", x = "T2PARIN") 
 
-bplot2 <- ggplot(test, aes(x = X1TCHCON, y = cate2)) +
-  geom_point() + labs(y = "CATEs")
+bplot2 <- ggplot(test, aes(x = cut, y = cate2)) +
+  geom_boxplot() + labs(y = "CATEs", x = "X1NUMSIB") +
+  scale_x_discrete(guide = guide_axis(n.dodge = 3))
 
 library(patchwork)
 bplot1 + bplot2
 ```
 
-From the previous estimations of variable importance, we found that T2PARIN and X1TCHCON were the two most significant predictors (according to their relative inclusion proportion in the BART model). The two plots demonstrate a similar lack of heterogeneity, as there is no identifiable relationship between the estimates and the two predictors.
+From the previous estimations of variable importance, we found that T2PARIN and X1NUMSIB were the two most significant predictors (according to their relative inclusion proportion in the BART model). The two plots demonstrate a similar lack of heterogeneity, as there is no identifiable relationship between the estimates and the two predictors.
 
 note: the W1_2P0PSU sampling weight also contributes to the model significantly, but it's not necessarily a predictor of interest but a variable added to the model to reduce bias.
 
