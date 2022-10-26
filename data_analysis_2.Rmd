@@ -141,7 +141,8 @@ bart_machine <- bartMachine(X=data.frame(train[,covariateNames]),
 
 
 var.importance <- investigate_var_importance(bart_machine, 
-                                            num_replicates_for_avg = 20)
+                                            num_replicates_for_avg = 20,
+                                            plot = F)
 
 #select variables whose importance is greater than the median
 important.vars = names(var.importance$avg_var_props)[
@@ -172,7 +173,7 @@ summary(model.cate)
 
 We then identified the most important variables (selecting those variables with inclusion proportions greater than the median proportion for the BART model). Those variables were then used to fit another BART object and predict CATEs once again. The model CATE was slightly greater than the first estimation with all the variables included, but not by much.
 
-note: we reduced the num_replicates_for_avg due to questions of efficiency; we decided to decrease from 25 to 20, as more 
+note: we reduced the num_replicates_for_avg due to questions of efficiency; we decided to decrease from 25 to 20. We also noticed the top variables in the proportion figure kept changing, even when setting a seed. As such, we identified the two predictors that occurred the most in multiple runs of the investigate_var_importance function. Results are identified below:
 
 ```{r comparing BART, echo = T, include = T, message= F, warning = F, error = F}
 
@@ -216,7 +217,7 @@ bplot1 + bplot2
 
 From the previous estimations of variable importance, we found that T2PARIN and X1NUMSIB were the two most significant predictors (according to their relative inclusion proportion in the BART model). The two plots demonstrate a similar lack of heterogeneity, as there is no identifiable relationship between the estimates and the two predictors.
 
-note: the W1_2P0PSU sampling weight also contributes to the model significantly, but it's not necessarily a predictor of interest but a variable added to the model to reduce bias.
+note: the X1NUMSIB variable was previously standardized, that's why the plots are divided into not the most helpful quartiles.
 
 \newpage
 
