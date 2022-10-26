@@ -11,7 +11,11 @@ editor_options:
 ```{r setup, echo=T, include=T, message=F, warning=F, error=F}
 
 ## libraries
-libs <- c("tidyverse", "haven", "bibtex", "psych", "knitr", "pastecs", "kableExtra","survey", "cobalt", "randomForest", "ipred","rpart", "baguette", "parsnip", "SimDesign", "bartCause", "lme4", "grf", "GenericML", "car", "bartMachine", "gtools")
+libs <- c("tidyverse", "haven", "bibtex", 
+          "psych", "knitr", "pastecs", "kableExtra","survey", 
+          "cobalt", "randomForest", "ipred","rpart", "baguette", 
+          "parsnip", "SimDesign", "bartCause", "lme4", "grf", 
+          "GenericML", "car", "bartMachine", "gtools", "patchwork")
 
 sapply(libs, require, character.only = TRUE)
 
@@ -46,37 +50,9 @@ covariateNames <- c(
     "S1_ID",
     "W1_2P0PSU",
     "prop.missing",
-    "X_CHSEX_R", "X_RACETH_R", "P1HSCALE")
-
-covariateNamesBART <- c(
-    "X1RTHETK1", 
-    "X1MTHETK1",
-    "X1TCHAPP", 
-    "X1TCHCON",
-    "X1TCHPER", 
-    "X1TCHEXT",
-    "X1TCHINT",
-    "X1ATTNFS",
-    "X1INBCNT",
-    "X12MOMAR",
-    "X1NUMSIB", 
-    "P1OLDMOM",
-    "P1CHLDBK",
-    "P2DISTHM",
-    "P1NUMPLA",
-    "T2PARIN",
-    "X12PAR1ED_I",
-    "X12PAR2ED_I",
-    "X2INCCAT_I",
-    "X1PAR1EMP",
-    "S2LUNCH",
-    "X2KRCETH",
-    "S2NGHBOR",
-    "S2OUTSID",
-    "S2USDABR",
-    "S2PUBSOC",
-    "X1LOCALE",
-    "X_CHSEX_R", "X_RACETH_R", "P1HSCALE")
+    "X_CHSEX_R", 
+    "X_RACETH_R", 
+    "P1HSCALE")
 
 ## directory path (assignment_2 as current working directory)
 
@@ -91,7 +67,7 @@ for (var in covariateNames) {
 
 ```
 
-In this paper, we explore heterogeneity of treatment using three different methods; CausalBART, GenericML, and CausalForest. We will explore the heterogeneity (Questions 1, 3, and 4) separately for each model before concluding and comparing CATES (Question 2) at the conclusion of the paper.
+In this paper, we explore heterogeneity of treatment using three different methods; CausalBART, GenericML, and CausalForest. We will explore the heterogeneity (Questions 1, 3, and 4) separately for each model before concluding and comparing CATEs (Question 2) at the conclusion of the paper.
 
 ```{r pre q PSM model, echo = T, include = T, message=F, warning = F, error = F}
 
@@ -111,46 +87,65 @@ train <- data %>%
   sample_frac(size = 0.5)
 test <- anti_join(data, train)
 
-matrix_covsBART <- as.matrix(train %>% select(covariateNamesBART) %>%
-                           mutate(across(.fns = as.numeric))) 
+train <- train %>% mutate(across(.fns = as.numeric))
+test <- test %>% mutate(across(.fns = as.numeric))
+train$treated <- train$treated - 1
+test$treated <- test$treated - 1
 
-matrix_covsBART_2 <- as.matrix(test %>% select(covariateNamesBART) %>%
-                           mutate(across(.fns = as.numeric))) 
+#matrix_covs <- as.matrix(train %>% select(all_of(covariateNames)) %>%
+                          # mutate(across(.fns = as.numeric)))
+
 
 # estimating conditional average treatment effects (CATEs) using BART
 
 bart <- bartc(response = train$X2MTHETK1,
-             treatment = as.numeric(as.character(train$treated)),
-             confounders = matrix_covsBART,
+             treatment = train$treated,
+             confounders = data.frame(train[,covariateNames]),
              method.rsp = "bart", 
              method.trt = "glm",
              keepTrees = TRUE,
              estimand = "ate")
 
 cate <- predict(bart,
-               newdata = matrix_covsBART_2,
+               newdata = data.frame(test[,covariateNames]),
                type = "icate")
 
 cate_m <- apply(cate, 2, mean) 
+  
+test$cate <- apply(cate, 2, mean) 
+
+modely <- summary(bart, target = "cate")
+
+```
+
+We first attempted estimating the conditional average treatment effects (CATEs) 
+of early childhood care on mathematics scores using Bayesian Additive Regression Trees (BART) for the entire dataset and for all the covariates estimated in the original propensity score model. We found that splitting the data into training and testing data mitigated severe overfitting issues (particularly in calculating the propensity scores).
+
+note: the bartc function does not allow the typical adjustments to hyperparamters characteristic of the other functions like genericML and causal_forest, so we decided to focus just on making adjustments to the arguments of the functions as needed.
+
+We also tried estimating the propensity scores & CATEs both with BART, but found that logistic regression was better suited in estimating the scores while still using BART for the CATEs.
+
+The final model (modely) provides the CATE derived from the fit BART model, demonstrating no substantive treatment effect heterogeneity.
 
 
-library(bartMachine)
+```{r q_3,BART, echo = T, include = T, message= F, warning = F, error = F}
 
-bart_machine <- bartMachine(X=as.data.frame(matrix_covsBART), 
+#library(bartMachine) already in libs list 
+
+
+bart_machine <- bartMachine(X=data.frame(train[,covariateNames]), 
                             y=cate_m,
                             serialize = T, 
-                            mem_cache_for_speed = F)
+                            mem_cache_for_speed = F,
+                            seed = 20221026)
 
 
 var.importance <- investigate_var_importance(bart_machine, 
-                                            num_replicates_for_avg = 25)
+                                            num_replicates_for_avg = 20)
 
 #select variables whose importance is greater than the median
 important.vars = names(var.importance$avg_var_props)[
   var.importance$avg_var_props > median(var.importance$avg_var_props)]
-
-test <- test %>% mutate(across(.fns = as.numeric))
-test$treated <- test$treated - 1
 
 bart2 <- bartc(response = test$X2MTHETK1,
               treatment = test$treated,
@@ -166,6 +161,8 @@ cate2 <- predict(bart2,
 
 test$cate2 <- apply(cate2, 2, mean)
 
+modely2 <- summary(bart2, target = "cate")
+
 model <- paste(important.vars, collapse="+")
 model <- paste(c("cate2",model), collapse="~")
 model.cate <- lm(model,data = test)
@@ -173,42 +170,55 @@ summary(model.cate)
 
 ```
 
+We then identified the most important variables (selecting those variables with inclusion proportions greater than the median proportion for the BART model). Those variables were then used to fit another BART object and predict CATEs once again. The model CATE was slightly greater than the first estimation with all the variables included, but not by much.
 
+note: we reduced the num_replicates_for_avg due to questions of efficiency; we decided to decrease from 25 to 20, as more 
 
-```{r q_2,BART, echo = T, include = T, message= F, warning = F, error = F}
+```{r comparing BART, echo = T, include = T, message= F, warning = F, error = F}
+
+blabels = c("Full Model", "Important Variables Only")
 
 # correlation matrix
 
-# cor(bart2, cate2, method = c("pearson", "kendall", "spearman"))
+cor <- cor(test$cate, test$cate2)
 
-# qqplot 
+# boxplot
 
-# plot1 <- gglot(sample = bart2, data = chapter_10_data_cleaned_and_imputed.Rdata, color=cyl)+theme_bw()
+plot1 <- boxplot(test$cate, test$cate2, names = blabels, ylab = "CATEs")
 
+# qqplot
 
+qplot <- qqplot(test$cate, test$cate2, xlab = "Full Model", ylab = "Important Vars")
+
+cor + plot1 + qplot
 ```
+
+Especially from the boxplot, it seems that the CATEs of the important variables model were slightly enhanced but not substantively. From the correlation matrix, there is a very weak correlation noted (~0.21).
 
 # Two most important CATE predictors (BART), plot CATE/predictor relationship
 
 ```{r q_4,BART, echo = T, include = T, message= F, warning = F, error = F}
 
 ## top 2 predictors
-top.pred <- c("X1TCHINT", "X1NUMSIB")
+top.pred <- c("T2PARIN", "X1TCHCON")
 
-qpredvar_tch <- quantcut(test$X1TCHINT, na.rm = TRUE)
-qpredvar_num <-  quantcut(test$X1NUMSIB, na.rm = TRUE)
+cut <- quantcut(test$T2PARIN, q = 4, na.rm = TRUE)
 
 ## plot relationship
 
-bplot1 <- ggplot(test, aes(x = qpredvar_tch, y = cate2)) +
-  geom_boxplot()
+bplot1 <- ggplot(test, aes(x = cut, y = cate2)) +
+  geom_boxplot() + labs(y = "CATEs")
 
-bplot2 <- ggplot(test, aes(x = qpredvar_num, y = cate2)) +
-  geom_boxplot()
+bplot2 <- ggplot(test, aes(x = X1TCHCON, y = cate2)) +
+  geom_point() + labs(y = "CATEs")
 
 library(patchwork)
 bplot1 + bplot2
 ```
+
+From the previous estimations of variable importance, we found that T2PARIN and X1TCHCON were the two most significant predictors (according to their relative inclusion proportion in the BART model). The two plots demonstrate a similar lack of heterogeneity, as there is no identifiable relationship between the estimates and the two predictors.
+
+note: the W1_2P0PSU sampling weight also contributes to the model significantly, but it's not necessarily a predictor of interest but a variable added to the model to reduce bias.
 
 \newpage
 
@@ -268,6 +278,7 @@ get_best(genML)
 ```
 
 Unlike when initially calculating heterogeneity on attendance, GenML does not find evidence of significant heterogeneity when looking at spring math scores. For the purpose of the assignment however, we continue analyzing as if there was heterogeneity to be explored.
+
 ```{r}
 get_BLP(genML)
 ## (no longer) significant indicating treatment heterogeneity
@@ -278,6 +289,7 @@ get_GATES(genML)
 ```
 
 The below code predicts CATEs with all covariates for use in Q2 at the end of the paper.
+
 ```{r}
 # Predict CATEs with full dataset for plotting/comparison
 genML_Q2 <- proxy_CATE(Z = matrix_covs,
@@ -311,9 +323,10 @@ genML_imps <- genML_sig %>%
 genML_imps <- genML_imps[["name"]]
 ```
 
-Then, a new covariate matrix was created with only variables whose p-value was less than the median of all. As there is no directly comparable function to variable importance in causal forests and bart machine for causal bart, this was our best approximation of a simialr concept.
+Then, a new covariate matrix was created with only variables whose p-value was less than the median of all. As there is no directly comparable function to variable importance in causal forests and bart machine for causal bart, this was our best approximation of a similar concept.
 
 We then recalculated CATEs with only these reduced covariates.
+
 ```{r}
 # Create reduced covariates matrix
 matrix_covsGML2 <- as.matrix(data %>% select(all_of(genML_imps)) %>%
@@ -328,7 +341,8 @@ genML_Q3 <- proxy_CATE(Z = matrix_covsGML2,
 data$GenML_CATEr <- genML_Q3$estimates$CATE
 ```
 
-The resulting CATEs are summarized below. These results indicate that there is some variation, however, as noted above the omnibus test failed to find significant heterogeneity, so cannot assume this variation is anything other than noise. The correlation between the reduced and all variable CATE is 0.49 indicating a moderate relationship as demonstrated by the plot provided below as well
+The resulting CATEs are summarized below. These results indicate that there is some variation, however, as noted above the omnibus test failed to find significant heterogeneity, so cannot assume this variation is anything other than noise. The correlation between the reduced and all variable CATE is 0.49 indicating a moderate relationship as demonstrated by the plot provided below as well.
+
 ```{r}
 summary(data$GenML_CATEr)
 
@@ -550,11 +564,12 @@ boxplot(cate_m, CATE_causalForest, GenML_CATEhalf,
 
 # Method Comparisons and Conclusion
 
-Insert BART conclusion
+BART detected no treatment effect heterogeneity, as evidenced by the CATE parameter estimate of almost 0. The CATE estimates between the full model with all covariates and the important variables model were slightly correlated. The two most important predictors identified were not related to our CATE estimates, further evidence of lack of treatment heterogeneity.
+
 
 GenericML failed to find any evidence of treatment heterogeneity on the math score outcome variable. The p-value of the omnibus test for heterogeneity was 0.41, so not even close to marginal significance. The CATEs calculated with all vars and only important vars were loosely similar to each other. The two most important variables still showed no real evidence of treatment heterogeneity.
 
-Causal Forest (CF) did not fit very well with the data set. Because when using the training data set, CF with the best tunning parameters detected heterogeneity, but it failed to detect heterogeneity by using the testing data set. When plotting the top two important predictors with CATE, we found no difference between groups.
+Causal Forest (CF) did not fit very well with the data set. Because when using the training data set, CF with the best tuning parameters detected heterogeneity, but it failed to detect heterogeneity by using the testing data set. When plotting the top two important predictors with CATE, we found no difference between groups.
 
 Comparing CATEs estimated between methods we found there was surprisingly little correlation between any of the methods. Although they all predicted a CATE average close to 0, BART and Causal Forest had much narrower spreads than GenericML. This may have been in part due to the more awkward nature of pulling the CATE out GenericML, as it is not available from the primary GenericML object and needs a separate calculation.
 
